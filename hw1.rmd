@@ -1,0 +1,9 @@
+---
+title: 'Homework #1'
+author: "Chad Pickering"
+date: "1/26/2018"
+output: html_document
+---
+
+Test .rmd.
+
