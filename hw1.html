@@ -138,8 +138,8 @@ $(document).ready(function () {
 </div>
 <div id="q2.-linux-shell-commands" class="section level2">
 <h2>Q2. Linux Shell Commands</h2>
-<div id="question-1." class="section level4">
-<h4>Question 1.</h4>
+<div id="question-1." class="section level3">
+<h3>Question 1.</h3>
 <p><strong>How many persons are in the data set (statisticians call this <code>n</code>)?</strong></p>
 <pre class="bash"><code>awk '{print $2}' /home/m280-data/hw1/merge-geno.fam | sort | uniq | wc -l</code></pre>
 <pre><code>## 959</code></pre>
@@ -147,8 +147,8 @@ $(document).ready(function () {
 <pre class="bash"><code>awk '{print $2}' /home/m280-data/hw1/merge-geno.bim | sort | uniq | wc -l</code></pre>
 <pre><code>## 8348674</code></pre>
 </div>
-<div id="question-2." class="section level4">
-<h4>Question 2.</h4>
+<div id="question-2." class="section level3">
+<h3>Question 2.</h3>
 <p><strong>Which chromosomes does this data set contain?</strong></p>
 <pre class="bash"><code>awk '{print $1}' /home/m280-data/hw1/merge-geno.bim | uniq</code></pre>
 <pre><code>## 1
@@ -176,14 +176,14 @@ $(document).ready(function () {
 ##  393615 19
 ##  239352 21</code></pre>
 </div>
-<div id="question-3." class="section level4">
-<h4>Question 3.</h4>
+<div id="question-3." class="section level3">
+<h3>Question 3.</h3>
 <p><strong>MAP4 (microtubule-associated protein 4) is a gene on chromosome 3 spanning positions 47,892,180 bp – 48,130,769 bp. How many SNPs are located within MAP4 gene?</strong></p>
 <pre class="bash"><code>awk '{if($1 == 3 &amp;&amp; $4 &gt;= 47892180 &amp;&amp; $4 &lt;= 48130769) {print $2}}' /home/m280-data/hw1/merge-geno.bim | uniq | wc -l</code></pre>
 <pre><code>## 894</code></pre>
 </div>
-<div id="question-4." class="section level4">
-<h4>Question 4.</h4>
+<div id="question-4." class="section level3">
+<h3>Question 4.</h3>
 <p><strong>Statistical geneticists often have to reformat a data set to feed into various analysis programs. For example, to use the Mendel software we have to reformat the data set to be read by Mendel. Mendel’s SNP definition file is similar to the plink <code>bim</code> file but has format <code>SNP ID</code>, <code>Chromosome</code>, <code>Base Pair Position</code> with each field separated by a comma. Write a Linux shell command to convert <code>merge-geno.bim</code> to Mendel SNP definition file.</strong></p>
 <pre class="bash"><code>awk '{print $2&quot;,&quot;$1&quot;,&quot;$4}' /home/m280-data/hw1/merge-geno.bim &gt; hw1_def_file.txt | sed -i '1 i\2.40=FILE FORMAT VERSION NUMBER.\n8348674=NUMBER OF SNPS LISTED HERE.' hw1_def_file.txt ; head -20 hw1_def_file.txt</code></pre>
 <pre><code>## 2.40=FILE FORMAT VERSION NUMBER.
@@ -228,6 +228,23 @@ $(document).ready(function () {
 ## 2,0200033,0200001,0200015,F,
 ## 2,0200034,0200001,0200015,F,
 ## 2,0200035,0200001,0200015,F,</code></pre>
+</div>
+</div>
+<div id="q3.-r-batch-run" class="section level2">
+<h2>Q3. R Batch Run</h2>
+<div id="question-1.-1" class="section level3">
+<h3>Question 1.</h3>
+<p><strong>Expand the <code>runSim.R</code> script to include arguments <code>seed</code> (random seed), <code>n</code> (sample size), <code>dist</code> (distribution) and <code>rep</code> (number of simulation replicates). Calling <code>runSim.R</code> will (1) set random seed according to argument <code>seed</code>, (2) generate data according to argument <code>dist</code>, (3) compute the primed-indexed average estimator in class and the classical sample average estimator for each simulation replicate, (4) report the average mean squared error (MSE)</strong> <span class="math display">\[
+  \frac{\sum_{r=1}^{\text{rep}} (\widehat \mu_r - \mu_{\text{true}})^2}{\text{rep}}
+\]</span> <strong>for both methods.</strong></p>
+</div>
+<div id="question-2.-1" class="section level3">
+<h3>Question 2.</h3>
+<p><strong>Modify the <code>autoSim.R</code> script to run simulations with combinations of sample sizes <code>nVals = seq(100, 500, by=100)</code> and distributions <code>distTypes = c(&quot;gaussian&quot;, &quot;t1&quot;, &quot;t5&quot;)</code> and write output to appropriately named files. Use <code>rep = 50</code>, and <code>seed = 280</code>.</strong></p>
+</div>
+<div id="question-3.-1" class="section level3">
+<h3>Question 3.</h3>
+<p><strong>Write an R script to collect simulation results from output files and print average MSEs in the table, form provided in the instructions.</strong></p>
 </div>
 </div>
 
