@@ -39,7 +39,19 @@ awk '{print $2}' /home/m280-data/hw1/merge-geno.fam | sort | uniq | wc -l
 awk '{print $2}' /home/m280-data/hw1/merge-geno.bim | sort | uniq | wc -l
 ```
 
-2. Which chromosomes does this data set contain? How many SNPs are in each chromosome?
+#### Question 2.  
+
+**Which chromosomes does this data set contain?**  
+
+```{bash}
+awk '{print $1}' /home/m280-data/hw1/merge-geno.bim | uniq
+```
+
+**How many SNPs are in each chromosome?** 
+
+```{bash}
+awk '{print $1}' /home/m280-data/hw1/merge-geno.bim | sort -n | uniq -c
+```
 
 3. MAP4 (microtubule-associated protein 4) is a gene on chromosome 3 spanning positions 47,892,180 bp -- 48,130,769 bp. How many SNPs are located within MAP4 gene?
 
