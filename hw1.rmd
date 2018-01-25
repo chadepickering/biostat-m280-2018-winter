@@ -61,6 +61,23 @@ awk '{print $1}' /home/m280-data/hw1/merge-geno.bim | sort -n | uniq -c
 awk '{if($1 == 3 && $4 >= 47892180 && $4 <= 48130769) {print $2}}' /home/m280-data/hw1/merge-geno.bim | uniq | wc -l
 ```
 
+#### Question 4.
+
+**Statistical geneticists often have to reformat a data set to feed into various analysis programs. For example, to use the Mendel software we have to reformat the data set to be read by Mendel. Mendel's SNP definition file is similar to the plink `bim` file but has format `SNP ID`, `Chromosome`, `Base Pair Position` with each field separated by a comma. Write a Linux shell command to convert `merge-geno.bim` to Mendel SNP definition file.**   
+      
+```{bash}
+awk '{print $2","$1","$4}' /home/m280-data/hw1/merge-geno.bim > hw1_def_file.txt | sed -i '1 i\2.40=FILE FORMAT VERSION NUMBER.\n8348674=NUMBER OF SNPS LISTED HERE.' hw1_def_file.txt ; head -20 hw1_def_file.txt
+```
+    
+**Mendel's pedigree file is similar to the plink `fam` file but has format `Family ID`, `Person ID`, `Father ID`, `Mother ID`, `Sex` coded as M or F, `Twin Status` with each field separated by a comma. Write a Linux shell command to convert `merge-geno.fam` to Mendel pedigree file. Since twin status is not available in plink format, we put nothing for that field. Also Mendel limits Person ID to have length less than or equal to 8 characters, so we have to strip the string `T2DG` from the IDs.**  
+
+```{bash}
+
+```
+
+
+
+
 
 
 

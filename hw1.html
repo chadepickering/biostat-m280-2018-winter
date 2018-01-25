@@ -182,6 +182,33 @@ $(document).ready(function () {
 <pre class="bash"><code>awk '{if($1 == 3 &amp;&amp; $4 &gt;= 47892180 &amp;&amp; $4 &lt;= 48130769) {print $2}}' /home/m280-data/hw1/merge-geno.bim | uniq | wc -l</code></pre>
 <pre><code>## 894</code></pre>
 </div>
+<div id="question-4." class="section level4">
+<h4>Question 4.</h4>
+<p><strong>Statistical geneticists often have to reformat a data set to feed into various analysis programs. For example, to use the Mendel software we have to reformat the data set to be read by Mendel. Mendel’s SNP definition file is similar to the plink <code>bim</code> file but has format <code>SNP ID</code>, <code>Chromosome</code>, <code>Base Pair Position</code> with each field separated by a comma. Write a Linux shell command to convert <code>merge-geno.bim</code> to Mendel SNP definition file.</strong></p>
+<pre class="bash"><code>awk '{print $2&quot;,&quot;$1&quot;,&quot;$4}' /home/m280-data/hw1/merge-geno.bim &gt; hw1_def_file.txt | sed -i '1 i\2.40=FILE FORMAT VERSION NUMBER.\n8348674=NUMBER OF SNPS LISTED HERE.' hw1_def_file.txt ; head -20 hw1_def_file.txt</code></pre>
+<pre><code>## 2.40=FILE FORMAT VERSION NUMBER.
+## 8348674=NUMBER OF SNPS LISTED HERE.
+## 1-54490,1,54490
+## 1-55550,1,55550
+## 1-57033,1,57033
+## 1-57064,1,57064
+## 1-57818,1,57818
+## 1-58432,1,58432
+## 1-58448,1,58448
+## 1-58814,1,58814
+## 1-59492,1,59492
+## 1-60829,1,60829
+## 1-61462,1,61462
+## 1-61920,1,61920
+## 1-62162,1,62162
+## 1-62180,1,62180
+## 1-62426,1,62426
+## 1-67580,1,67580
+## 1-74902,1,74902
+## 1-76838,1,76838</code></pre>
+<p><strong>Mendel’s pedigree file is similar to the plink <code>fam</code> file but has format <code>Family ID</code>, <code>Person ID</code>, <code>Father ID</code>, <code>Mother ID</code>, <code>Sex</code> coded as M or F, <code>Twin Status</code> with each field separated by a comma. Write a Linux shell command to convert <code>merge-geno.fam</code> to Mendel pedigree file. Since twin status is not available in plink format, we put nothing for that field. Also Mendel limits Person ID to have length less than or equal to 8 characters, so we have to strip the string <code>T2DG</code> from the IDs.</strong></p>
+<pre class="bash"><code></code></pre>
+</div>
 </div>
 
 
