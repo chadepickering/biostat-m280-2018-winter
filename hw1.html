@@ -175,9 +175,12 @@ $(document).ready(function () {
 ##  477990 17
 ##  393615 19
 ##  239352 21</code></pre>
-<ol start="3" style="list-style-type: decimal">
-<li>MAP4 (microtubule-associated protein 4) is a gene on chromosome 3 spanning positions 47,892,180 bp – 48,130,769 bp. How many SNPs are located within MAP4 gene?</li>
-</ol>
+</div>
+<div id="question-3." class="section level4">
+<h4>Question 3.</h4>
+<p><strong>MAP4 (microtubule-associated protein 4) is a gene on chromosome 3 spanning positions 47,892,180 bp – 48,130,769 bp. How many SNPs are located within MAP4 gene?</strong></p>
+<pre class="bash"><code>awk '{if($1 == 3 &amp;&amp; $4 &gt;= 47892180 &amp;&amp; $4 &lt;= 48130769) {print $2}}' /home/m280-data/hw1/merge-geno.bim | uniq | wc -l</code></pre>
+<pre><code>## 894</code></pre>
 </div>
 </div>
 
