@@ -1,9 +1,30 @@
 ---
-title: 'Homework #1'
+title: 'Biostat M280 Homework #1'
 author: "Chad Pickering"
 date: "1/26/2018"
 output: html_document
 ---
 
-Test .rmd.
+## Q1. Git/GitHub
+
+**1. Apply for the Student Developer Pack at GitHub using your UCLA email.**    
+
+Done on January 21. My GitHub handle is @cepickering .  
+
+**2. Create a private repository `biostat-m280-2018-winter`; add `Hua-Zhou` and `juhkim111` as your collaborators with write permission.**
+
+Done on January 21. If write permission was somehow not granted, please contact me as soon as possible.  
+
+**3. Top directories of the repository should be `hw1`, `hw2`, ... Maintain two branches `master` and `develop`.**  
+
+Done on January 21. One subdirectory, `hw1` has been made, and the subsequent subdirectories will be created and used as the homeworks are assigned.  
+
+**4. After each homework due date, teaching assistant and instructor will check out your master branch for grading. Tag each of your homework submissions with tag names `hw1`, `hw2`, ... Tagging time will be used as your submission time.**  
+
+Understood.  
+
+## Q2. Linux Shell Commands
+
+
+
 
