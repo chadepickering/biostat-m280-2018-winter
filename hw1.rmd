@@ -72,7 +72,7 @@ awk '{print $2","$1","$4}' /home/m280-data/hw1/merge-geno.bim > hw1_def_file.txt
 **Mendel's pedigree file is similar to the plink `fam` file but has format `Family ID`, `Person ID`, `Father ID`, `Mother ID`, `Sex` coded as M or F, `Twin Status` with each field separated by a comma. Write a Linux shell command to convert `merge-geno.fam` to Mendel pedigree file. Since twin status is not available in plink format, we put nothing for that field. Also Mendel limits Person ID to have length less than or equal to 8 characters, so we have to strip the string `T2DG` from the IDs.**  
 
 ```{bash}
-
+sed 's/ /,/g' /home/m280-data/hw1/merge-geno.fam | sed 's/T2DG//g' | sed 's/\0\b//g' | awk '{if($5==1) $5="M"; else $5="F"}{print}' FS=, OFS=, > hw1_ped_file.txt ; head -20 hw1_ped_file.txt
 ```
 
 

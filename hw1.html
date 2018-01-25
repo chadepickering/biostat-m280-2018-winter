@@ -207,7 +207,27 @@ $(document).ready(function () {
 ## 1-74902,1,74902
 ## 1-76838,1,76838</code></pre>
 <p><strong>Mendel’s pedigree file is similar to the plink <code>fam</code> file but has format <code>Family ID</code>, <code>Person ID</code>, <code>Father ID</code>, <code>Mother ID</code>, <code>Sex</code> coded as M or F, <code>Twin Status</code> with each field separated by a comma. Write a Linux shell command to convert <code>merge-geno.fam</code> to Mendel pedigree file. Since twin status is not available in plink format, we put nothing for that field. Also Mendel limits Person ID to have length less than or equal to 8 characters, so we have to strip the string <code>T2DG</code> from the IDs.</strong></p>
-<pre class="bash"><code></code></pre>
+<pre class="bash"><code>sed 's/ /,/g' /home/m280-data/hw1/merge-geno.fam | sed 's/T2DG//g' | sed 's/\0\b//g' | awk '{if($5==1) $5=&quot;M&quot;; else $5=&quot;F&quot;}{print}' FS=, OFS=, &gt; hw1_ped_file.txt ; head -20 hw1_ped_file.txt</code></pre>
+<pre><code>## 2,0200001,,,M,
+## 2,0200002,,,F,
+## 2,0200003,,,F,
+## 2,0200004,,,F,
+## 2,0200005,,,M,
+## 2,0200006,,,M,
+## 2,0200007,,,F,
+## 2,0200008,,,F,
+## 2,0200009,,,F,
+## 2,0200012,,,M,
+## 2,0200013,,,M,
+## 2,0200018,,,M,
+## 2,0200023,,,F,
+## 2,0200024,,,M,
+## 2,0200027,,,F,
+## 2,0200031,0200001,0200015,M,
+## 2,0200032,0200001,0200015,F,
+## 2,0200033,0200001,0200015,F,
+## 2,0200034,0200001,0200015,F,
+## 2,0200035,0200001,0200015,F,</code></pre>
 </div>
 </div>
 
