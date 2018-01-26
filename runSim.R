@@ -41,6 +41,7 @@ avgMSE <- function(seed, n, dist, rep){
   
   prime_mse <- sum(prime_vector)/rep
   classical_mse <- sum(classical_vector)/rep
-  
-  return (c(prime_mse, classical_mse))
+  return(c(prime_mse, classical_mse))
+
 }
+
