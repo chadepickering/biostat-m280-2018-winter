@@ -15,14 +15,32 @@ isPrime = function(n) {
 }
 
 ## estimate mean only using observation with prime indices
-estMeanPrimes = function (x) {
+estMeanPrimes = function(x) {
   n = length(x)
   ind = sapply(1:n, isPrime)
   return (mean(x[ind]))
 }
 
-# simulate data
-x = rnorm(n)
-
-# estimate mean
-estMeanPrimes(x)
+avgMSE <- function(seed, n, dist, rep){
+  set.seed(seed)
+  prime_vector <- c()
+  classical_vector <- c()
+  
+  for(i in 1:rep){
+    if (dist == "gaussian"){
+      x <- rnorm(n)
+    } else if (dist == "t1"){ # Cauchy distribution has no mean!
+      x <- rt(n, 1)
+    } else if (dist == "t5"){
+      x <- rt(n, 5)
+    }
+    
+    prime_vector[i] <- (estMeanPrimes(x)-0)^2
+    classical_vector[i] <- (mean(x)-0)^2
+  }
+  
+  prime_mse <- sum(prime_vector)/rep
+  classical_mse <- sum(classical_vector)/rep
+  
+  return (c(prime_mse, classical_mse))
+}

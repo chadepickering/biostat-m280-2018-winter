@@ -9,6 +9,8 @@ isPrime = function(n) {
   return (TRUE)
 }
 
+
+
 ## estimate mean only using observation with prime indices
 estMeanPrimes = function (x) {
   n = length(x)

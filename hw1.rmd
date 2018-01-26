@@ -33,11 +33,15 @@ Understood.
 awk '{print $2}' /home/m280-data/hw1/merge-geno.fam | sort | uniq | wc -l
 ```
 
+Assuming each row is a unique person, we find **959** people (the command `uniq` is used anyway, just in case).  
+
 **How many SNPs are in the data set (statisticians call this `p`)?**  
 
 ```{bash}
 awk '{print $2}' /home/m280-data/hw1/merge-geno.bim | sort | uniq | wc -l
 ```
+
+Assuming each row is a unique SNP, we find **8348674** SNPs (the command `uniq` is used anyway, just in case).
 
 ### Question 2.  
 
@@ -60,6 +64,8 @@ awk '{print $1}' /home/m280-data/hw1/merge-geno.bim | sort -n | uniq -c
 ```{bash}
 awk '{if($1 == 3 && $4 >= 47892180 && $4 <= 48130769) {print $2}}' /home/m280-data/hw1/merge-geno.bim | uniq | wc -l
 ```
+
+**894** SNPs are located within the MAP4 gene.  
 
 ### Question 4.
 
