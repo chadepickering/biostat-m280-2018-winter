@@ -1,4 +1,3 @@
-# autoSim.R
 nVals <- seq(100, 500, by=100)
 dist <- c("gaussian", "t1", "t5")
 for (i in 1:3) {
@@ -8,7 +7,6 @@ for (i in 1:3) {
     sysCall <- paste('nohup Rscript runSim.R seed=280 ', arg, ' dist="', 
                     dist[i], '" rep=50', " > ", oFile, sep='')
     system(sysCall, ignore.stderr = TRUE)
-    #print(paste("sysCall=", sysCall, sep=""))
     print(sysCall)
   }
 }

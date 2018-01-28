@@ -2,12 +2,12 @@ gaussian = "gaussian"
 t1 = "t1"
 t5 = "t5"
 
-## parsing command arguments
+# parsing command arguments
 for (arg in commandArgs(TRUE)) {
   eval(parse(text = arg))
 }
 
-## check if a given integer is prime
+# check if a given integer is prime
 isPrime <- function(n) {
   if (n <= 3) {
     return (TRUE)
@@ -18,13 +18,14 @@ isPrime <- function(n) {
   return (TRUE)
 }
 
-## estimate mean only using observation with prime indices
+# estimate mean only using observation with prime indices
 estMeanPrimes <- function(x) {
   n <- length(x)
   ind <- sapply(1:n, isPrime)
   return (mean(x[ind]))
 }
 
+# function to pass arguments to calculate prime and classical means
 avgMSE <- function(seed, n, dist, rep){
   set.seed(seed)
   prime_vector <- c()
