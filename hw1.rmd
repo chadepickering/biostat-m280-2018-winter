@@ -72,13 +72,19 @@ awk '{if($1 == 3 && $4 >= 47892180 && $4 <= 48130769) {print $2}}' /home/m280-da
 **Statistical geneticists often have to reformat a data set to feed into various analysis programs. For example, to use the Mendel software we have to reformat the data set to be read by Mendel. Mendel's SNP definition file is similar to the plink `bim` file but has format `SNP ID`, `Chromosome`, `Base Pair Position` with each field separated by a comma. Write a Linux shell command to convert `merge-geno.bim` to Mendel SNP definition file.**   
       
 ```{bash}
-awk '{print $2","$1","$4}' /home/m280-data/hw1/merge-geno.bim > hw1_def_file.txt | sed -i '1 i\2.40=FILE FORMAT VERSION NUMBER.\n8348674=NUMBER OF SNPS LISTED HERE.' hw1_def_file.txt ; head -20 hw1_def_file.txt
+awk '{print $2","$1","$4}' /home/m280-data/hw1/merge-geno.bim > \
+hw1_def_file.txt | sed -i \
+'1 i\2.40=FILE FORMAT VERSION NUMBER.\n8348674=NUMBER OF SNPS LISTED HERE.' \
+hw1_def_file.txt ; head -20 hw1_def_file.txt
 ```
     
 **Mendel's pedigree file is similar to the plink `fam` file but has format `Family ID`, `Person ID`, `Father ID`, `Mother ID`, `Sex` coded as M or F, `Twin Status` with each field separated by a comma. Write a Linux shell command to convert `merge-geno.fam` to Mendel pedigree file. Since twin status is not available in plink format, we put nothing for that field. Also Mendel limits Person ID to have length less than or equal to 8 characters, so we have to strip the string `T2DG` from the IDs.**  
 
 ```{bash}
-sed 's/ /,/g' /home/m280-data/hw1/merge-geno.fam | sed 's/T2DG//g' | sed 's/\0\b//g' | awk '{if($5==1) $5="M"; else $5="F"}{print}' FS=, OFS=, > hw1_ped_file.txt ; head -20 hw1_ped_file.txt
+sed 's/ /,/g' /home/m280-data/hw1/merge-geno.fam | 
+sed 's/T2DG//g' | sed 's/\0\b//g' | 
+awk '{if($5==1) $5="M"; else $5="F"}{print}' FS=, OFS=, > hw1_ped_file.txt ; 
+head -20 hw1_ped_file.txt
 ```
 
 ## Q3. R Batch Run
@@ -87,7 +93,8 @@ sed 's/ /,/g' /home/m280-data/hw1/merge-geno.fam | sed 's/T2DG//g' | sed 's/\0\b
 
 **Expand the `runSim.R` script to include arguments `seed` (random seed), `n` (sample size), `dist` (distribution) and `rep` (number of simulation replicates). Calling `runSim.R` will (1) set random seed according to argument `seed`, (2) generate data according to argument `dist`, (3) compute the primed-indexed average estimator in class and the classical sample average estimator for each simulation replicate, (4) report the average mean squared error (MSE)**
 $$
-  \frac{\sum_{r=1}^{\text{rep}} (\widehat \mu_r - \mu_{\text{true}})^2}{\text{rep}}
+  \frac{\sum_{r=1}^{\text{rep}} (\widehat \mu_r - 
+  \mu_{\text{true}})^2}{\text{rep}}
 $$
 **for both methods.**  
 
