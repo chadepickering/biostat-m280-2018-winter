@@ -203,6 +203,7 @@ final_df$n <- rep(nVals, each=2)
 final_df$Method <- rep(c("PrimeAvg", "SampleAvg"), by=5)
 final_df <- final_df[ ,c(4, 5, 1, 2, 3)]
 colnames(final_df) <- c("n", "Method", "t_1", "t_5", "Gaussian")
+row.names(final_df) <- NULL
 final_df
 ```
 
