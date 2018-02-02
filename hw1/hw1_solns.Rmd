@@ -62,7 +62,8 @@ awk '{print $1}' /home/m280-data/hw1/merge-geno.bim | sort -n | uniq -c
 **MAP4 (microtubule-associated protein 4) is a gene on chromosome 3 spanning positions 47,892,180 bp -- 48,130,769 bp. How many SNPs are located within MAP4 gene?**  
 
 ```{bash}
-awk '{if($1 == 3 && $4 >= 47892180 && $4 <= 48130769) {print $2}}' /home/m280-data/hw1/merge-geno.bim | uniq | wc -l
+awk '{if($1 == 3 && $4 >= 47892180 && $4 <= 48130769) {print $2}}\
+' /home/m280-data/hw1/merge-geno.bim | uniq | wc -l
 ```
 
 **894** SNPs are located within the MAP4 gene.  
