@@ -357,22 +357,90 @@ final_df &lt;- as.data.frame(cbind(t1_col, t5_col, gaussian_col))
 final_df$n &lt;- rep(nVals, each=2)
 final_df$Method &lt;- rep(c(&quot;PrimeAvg&quot;, &quot;SampleAvg&quot;), by=5)
 final_df &lt;- final_df[ ,c(4, 5, 1, 2, 3)]
-colnames(final_df) &lt;- c(&quot;$n$&quot;, &quot;Method&quot;, &quot;$t_1$&quot;, &quot;$t_5$&quot;, &quot;Gaussian&quot;)
-kable(final_df)</code></pre>
-<pre><code>## 
-## 
-## | $n$|Method    |      $t_1$|     $t_5$|  Gaussian|
-## |---:|:---------|----------:|---------:|---------:|
-## | 100|PrimeAvg  | 2808.42570| 0.0664284| 0.0414674|
-## | 100|SampleAvg |  230.23720| 0.0167508| 0.0094834|
-## | 200|PrimeAvg  |  799.31393| 0.0418479| 0.0187544|
-## | 200|SampleAvg |   95.87976| 0.0076665| 0.0071637|
-## | 300|PrimeAvg  |  446.40235| 0.0241224| 0.0200254|
-## | 300|SampleAvg |   53.57742| 0.0054711| 0.0035344|
-## | 400|PrimeAvg  |   19.45133| 0.0243314| 0.0112689|
-## | 400|SampleAvg |   20.53370| 0.0035170| 0.0029707|
-## | 500|PrimeAvg  |  217.26890| 0.0116763| 0.0111769|
-## | 500|SampleAvg |   20.78780| 0.0033550| 0.0025920|</code></pre>
+colnames(final_df) &lt;- c(&quot;$n$&quot;, &quot;Method&quot;, &quot;$t_1$&quot;, &quot;$t_5$&quot;, &quot;Gaussian&quot;)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="right"><span class="math inline">\(n\)</span></th>
+<th align="left">Method</th>
+<th align="right"><span class="math inline">\(t_1\)</span></th>
+<th align="right"><span class="math inline">\(t_5\)</span></th>
+<th align="right">Gaussian</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">100</td>
+<td align="left">PrimeAvg</td>
+<td align="right">2808.42570</td>
+<td align="right">0.0664284</td>
+<td align="right">0.0414674</td>
+</tr>
+<tr class="even">
+<td align="right">100</td>
+<td align="left">SampleAvg</td>
+<td align="right">230.23720</td>
+<td align="right">0.0167508</td>
+<td align="right">0.0094834</td>
+</tr>
+<tr class="odd">
+<td align="right">200</td>
+<td align="left">PrimeAvg</td>
+<td align="right">799.31393</td>
+<td align="right">0.0418479</td>
+<td align="right">0.0187544</td>
+</tr>
+<tr class="even">
+<td align="right">200</td>
+<td align="left">SampleAvg</td>
+<td align="right">95.87976</td>
+<td align="right">0.0076665</td>
+<td align="right">0.0071637</td>
+</tr>
+<tr class="odd">
+<td align="right">300</td>
+<td align="left">PrimeAvg</td>
+<td align="right">446.40235</td>
+<td align="right">0.0241224</td>
+<td align="right">0.0200254</td>
+</tr>
+<tr class="even">
+<td align="right">300</td>
+<td align="left">SampleAvg</td>
+<td align="right">53.57742</td>
+<td align="right">0.0054711</td>
+<td align="right">0.0035344</td>
+</tr>
+<tr class="odd">
+<td align="right">400</td>
+<td align="left">PrimeAvg</td>
+<td align="right">19.45133</td>
+<td align="right">0.0243314</td>
+<td align="right">0.0112689</td>
+</tr>
+<tr class="even">
+<td align="right">400</td>
+<td align="left">SampleAvg</td>
+<td align="right">20.53370</td>
+<td align="right">0.0035170</td>
+<td align="right">0.0029707</td>
+</tr>
+<tr class="odd">
+<td align="right">500</td>
+<td align="left">PrimeAvg</td>
+<td align="right">217.26890</td>
+<td align="right">0.0116763</td>
+<td align="right">0.0111769</td>
+</tr>
+<tr class="even">
+<td align="right">500</td>
+<td align="left">SampleAvg</td>
+<td align="right">20.78780</td>
+<td align="right">0.0033550</td>
+<td align="right">0.0025920</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 

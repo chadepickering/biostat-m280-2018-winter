@@ -184,7 +184,7 @@ Rscript autoSim.R
 
 **Write an R script to collect simulation results from output files and print average MSEs in the table, form provided in the instructions.**  
 
-```{r, eval=FALSE}
+```{r}
 library(knitr)
 nVals <- seq(100, 500, by=100)
 dist <- c("gaussian", "t1", "t5")
@@ -208,10 +208,6 @@ final_df$n <- rep(nVals, each=2)
 final_df$Method <- rep(c("PrimeAvg", "SampleAvg"), by=5)
 final_df <- final_df[ ,c(4, 5, 1, 2, 3)]
 colnames(final_df) <- c("$n$", "Method", "$t_1$", "$t_5$", "Gaussian")
-```
-
-```{bash, echo=FALSE}
-Rscript collectSim.R
 ```
 
 ```{r, echo=FALSE, results='asis'}
