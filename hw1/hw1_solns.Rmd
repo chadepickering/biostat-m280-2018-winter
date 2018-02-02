@@ -177,7 +177,7 @@ for (i in 1:3) {
 }
 ```
 
-```{bash, echo=FALSE}
+```{bash, echo=FALSE, results=FALSE}
 Rscript autoSim.R
 ```
 
