@@ -316,11 +316,27 @@ for (i in 1:3) {
     print(sysCall)
   }
 }</code></pre>
+<pre><code>## [1] &quot;nohup Rscript runSim.R seed=280 n=100 dist=\&quot;gaussian\&quot; rep=50 &gt; gaussian_n100.txt&quot;
+## [1] &quot;nohup Rscript runSim.R seed=280 n=200 dist=\&quot;gaussian\&quot; rep=50 &gt; gaussian_n200.txt&quot;
+## [1] &quot;nohup Rscript runSim.R seed=280 n=300 dist=\&quot;gaussian\&quot; rep=50 &gt; gaussian_n300.txt&quot;
+## [1] &quot;nohup Rscript runSim.R seed=280 n=400 dist=\&quot;gaussian\&quot; rep=50 &gt; gaussian_n400.txt&quot;
+## [1] &quot;nohup Rscript runSim.R seed=280 n=500 dist=\&quot;gaussian\&quot; rep=50 &gt; gaussian_n500.txt&quot;
+## [1] &quot;nohup Rscript runSim.R seed=280 n=100 dist=\&quot;t1\&quot; rep=50 &gt; t1_n100.txt&quot;
+## [1] &quot;nohup Rscript runSim.R seed=280 n=200 dist=\&quot;t1\&quot; rep=50 &gt; t1_n200.txt&quot;
+## [1] &quot;nohup Rscript runSim.R seed=280 n=300 dist=\&quot;t1\&quot; rep=50 &gt; t1_n300.txt&quot;
+## [1] &quot;nohup Rscript runSim.R seed=280 n=400 dist=\&quot;t1\&quot; rep=50 &gt; t1_n400.txt&quot;
+## [1] &quot;nohup Rscript runSim.R seed=280 n=500 dist=\&quot;t1\&quot; rep=50 &gt; t1_n500.txt&quot;
+## [1] &quot;nohup Rscript runSim.R seed=280 n=100 dist=\&quot;t5\&quot; rep=50 &gt; t5_n100.txt&quot;
+## [1] &quot;nohup Rscript runSim.R seed=280 n=200 dist=\&quot;t5\&quot; rep=50 &gt; t5_n200.txt&quot;
+## [1] &quot;nohup Rscript runSim.R seed=280 n=300 dist=\&quot;t5\&quot; rep=50 &gt; t5_n300.txt&quot;
+## [1] &quot;nohup Rscript runSim.R seed=280 n=400 dist=\&quot;t5\&quot; rep=50 &gt; t5_n400.txt&quot;
+## [1] &quot;nohup Rscript runSim.R seed=280 n=500 dist=\&quot;t5\&quot; rep=50 &gt; t5_n500.txt&quot;</code></pre>
 </div>
 <div id="question-3.-1" class="section level3">
 <h3>Question 3.</h3>
 <p><strong>Write an R script to collect simulation results from output files and print average MSEs in the table, form provided in the instructions.</strong></p>
-<pre class="r"><code>nVals &lt;- seq(100, 500, by=100)
+<pre class="r"><code>library(knitr)
+nVals &lt;- seq(100, 500, by=100)
 dist &lt;- c(&quot;gaussian&quot;, &quot;t1&quot;, &quot;t5&quot;)
 filenames &lt;- c()
 for (i in 1:3) {
@@ -341,19 +357,22 @@ final_df &lt;- as.data.frame(cbind(t1_col, t5_col, gaussian_col))
 final_df$n &lt;- rep(nVals, each=2)
 final_df$Method &lt;- rep(c(&quot;PrimeAvg&quot;, &quot;SampleAvg&quot;), by=5)
 final_df &lt;- final_df[ ,c(4, 5, 1, 2, 3)]
-colnames(final_df) &lt;- c(&quot;n&quot;, &quot;Method&quot;, &quot;t_1&quot;, &quot;t_5&quot;, &quot;Gaussian&quot;)
-final_df</code></pre>
-<pre><code>##      n    Method        t_1         t_5    Gaussian
-## 1  100  PrimeAvg 2808.42570 0.066428440 0.041467370
-## 2  100 SampleAvg  230.23720 0.016750780 0.009483390
-## 3  200  PrimeAvg  799.31393 0.041847883 0.018754358
-## 4  200 SampleAvg   95.87976 0.007666523 0.007163651
-## 5  300  PrimeAvg  446.40235 0.024122430 0.020025445
-## 6  300 SampleAvg   53.57742 0.005471060 0.003534446
-## 7  400  PrimeAvg   19.45133 0.024331412 0.011268897
-## 8  400 SampleAvg   20.53370 0.003517023 0.002970676
-## 9  500  PrimeAvg  217.26890 0.011676282 0.011176895
-## 10 500 SampleAvg   20.78780 0.003354976 0.002591991</code></pre>
+colnames(final_df) &lt;- c(&quot;$n$&quot;, &quot;Method&quot;, &quot;$t_1$&quot;, &quot;$t_5$&quot;, &quot;Gaussian&quot;)
+kable(final_df)</code></pre>
+<pre><code>## 
+## 
+## | $n$|Method    |      $t_1$|     $t_5$|  Gaussian|
+## |---:|:---------|----------:|---------:|---------:|
+## | 100|PrimeAvg  | 2808.42570| 0.0664284| 0.0414674|
+## | 100|SampleAvg |  230.23720| 0.0167508| 0.0094834|
+## | 200|PrimeAvg  |  799.31393| 0.0418479| 0.0187544|
+## | 200|SampleAvg |   95.87976| 0.0076665| 0.0071637|
+## | 300|PrimeAvg  |  446.40235| 0.0241224| 0.0200254|
+## | 300|SampleAvg |   53.57742| 0.0054711| 0.0035344|
+## | 400|PrimeAvg  |   19.45133| 0.0243314| 0.0112689|
+## | 400|SampleAvg |   20.53370| 0.0035170| 0.0029707|
+## | 500|PrimeAvg  |  217.26890| 0.0116763| 0.0111769|
+## | 500|SampleAvg |   20.78780| 0.0033550| 0.0025920|</code></pre>
 </div>
 </div>
 

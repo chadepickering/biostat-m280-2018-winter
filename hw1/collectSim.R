@@ -1,3 +1,4 @@
+library(knitr)
 nVals <- seq(100, 500, by=100)
 dist <- c("gaussian", "t1", "t5")
 filenames <- c()
@@ -19,5 +20,4 @@ final_df <- as.data.frame(cbind(t1_col, t5_col, gaussian_col))
 final_df$n <- rep(nVals, each=2)
 final_df$Method <- rep(c("PrimeAvg", "SampleAvg"), by=5)
 final_df <- final_df[ ,c(4, 5, 1, 2, 3)]
-colnames(final_df) <- c("n", "Method", "t_1", "t_5", "Gaussian")
-final_df
+colnames(final_df) <- c("$n$", "Method", "$t_1$", "$t_5$", "Gaussian")
