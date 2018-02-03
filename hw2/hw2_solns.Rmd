@@ -1,0 +1,105 @@
+---
+title: "BIOSTAT M280 HW2"
+author: "Chad Pickering"
+date: "2/16/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Q1
+
+### Exercise 7.3.4
+
+*Question 1*  
+
+Explore the distribution of each of the `x`, `y`, and `z` variables in `diamonds`. What do you learn? Think about a diamond and how you might decide which dimension is the length, width, and depth.  
+
+We first plot the frequencies of measurements (in mm) of the three dimensions. We notice that the Z variable is concentrated between 2.5-5mm, whereas X and Y are very highly correlated, following almost exactly the same frequencies for the entire domain. The conclusion is that *Z is very likely the depth (height) of the diamond*, since from a birds' eye view, the length and width are essentially the same.   
+
+```{r, message=FALSE}
+library(tidyverse)
+ggplot(diamonds) + 
+  geom_freqpoly(mapping = aes(x = x, color = "X"), binwidth = 0.05) +
+  geom_freqpoly(mapping = aes(x = y, color = "Y"), binwidth = 0.05) +
+  geom_freqpoly(mapping = aes(x = z, color = "Z"), binwidth = 0.05) +
+  coord_cartesian(xlim = c(2.5, 9)) +
+  labs(title = "Frequency of Measurements of Dimensions of Diamonds",
+       subtitle = "Bin width = 0.05mm",
+       x = "Measurement (mm)",
+       y = "Frequency") +
+  theme(legend.position = "bottom") +
+  scale_colour_discrete(name = "Dimension")
+```
+
+The following is a scatterplot of the length and width variables colored by the depth of the diamond. Despite a handful of points that do not follow the general approximate length=width trend (a few extreme outliers are obscured from view - these seem like data entry errors). As length/width increase, so does depth, quite linearly at that. We assert that X is length and Y is width - these terms can be interchanged, but the meaning will not be lost.  
+
+```{r}
+z_common <- diamonds %>% 
+  filter(z > 2 & z < 6) 
+ggplot(z_common) +
+  geom_point(mapping = aes(x = x, y = y, color = z)) + 
+  coord_cartesian(xlim = c(3, 11), ylim = c(3, 11)) +
+  labs(title = "Length vs. Width of Diamonds by Depth (mm)",
+       x = "X (length) (mm)",
+       y = "Y (width) (mm)") +
+  theme(legend.position = "right") +
+  scale_colour_continuous(name = "Z (depth)")
+```
+
+
+### Exercise 7.4.1
+
+### Exercise 7.5.1.1
+
+### Exercise 7.5.2.1
+
+### Exercise 7.5.3.1
+
+## Q3
+
+Redo HW1 Q2 using functions in tidyverse:  
+
+### Question 1.  
+
+**How many persons are in the data set (statisticians call this `n`)?**  
+
+Assuming each row is a unique person, we find **959** people (the command `uniq` is used anyway, just in case).  
+
+**How many SNPs are in the data set (statisticians call this `p`)?**  
+
+Assuming each row is a unique SNP, we find **8348674** SNPs (the command `uniq` is used anyway, just in case).
+
+### Question 2.  
+
+**Which chromosomes does this data set contain?**  
+
+
+
+**How many SNPs are in each chromosome?** 
+
+
+
+### Question 3.  
+
+**MAP4 (microtubule-associated protein 4) is a gene on chromosome 3 spanning positions 47,892,180 bp -- 48,130,769 bp. How many SNPs are located within MAP4 gene?**  
+
+
+
+**894** SNPs are located within the MAP4 gene.  
+
+### Question 4.
+
+**Statistical geneticists often have to reformat a data set to feed into various analysis programs. For example, to use the Mendel software we have to reformat the data set to be read by Mendel. Mendel's SNP definition file is similar to the plink `bim` file but has format `SNP ID`, `Chromosome`, `Base Pair Position` with each field separated by a comma. Write a Linux shell command to convert `merge-geno.bim` to Mendel SNP definition file.**   
+      
+
+    
+**Mendel's pedigree file is similar to the plink `fam` file but has format `Family ID`, `Person ID`, `Father ID`, `Mother ID`, `Sex` coded as M or F, `Twin Status` with each field separated by a comma. Write a Linux shell command to convert `merge-geno.fam` to Mendel pedigree file. Since twin status is not available in plink format, we put nothing for that field. Also Mendel limits Person ID to have length less than or equal to 8 characters, so we have to strip the string `T2DG` from the IDs.**  
+
+
+
+
+
+
