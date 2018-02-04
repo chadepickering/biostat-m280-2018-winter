@@ -243,6 +243,8 @@ c(mean(x_vec_na, na.rm = TRUE), sum(x_vec_na, na.rm = TRUE))
 
 ### Exercise 7.5.1.1
 
+*Question 1*  
+
 *Use what you’ve learned to improve the visualisation of the departure times of cancelled vs. non-cancelled flights.*  
 
 In the improved visualization, we use superimposed density curves to analyze the approximate relative frequency of departing (non-cancelled) flights compared to cancelled flights. We see given a flight is cancelled, it is likely that its departure time was between about 2-8pm rather than earlier in the day. We can see that the proportion of non-cancelled flights is bimodal, peaking in the early-mid morning, and again later in the day, while there are a low relative proportion of cancelled flights early in the day and a high relative proportion later in the day (compared to non-cancelled flights).  
@@ -277,18 +279,232 @@ flights %>%
        y = "Density")
 ```
 
+*Question 2*  
+
+*What variable in the diamonds dataset is most important for predicting the price of a diamond? How is that variable correlated with cut? Why does the combination of those two relationships lead to lower quality diamonds being more expensive?*  
+
+Without doing a backwards model selection procedure to find the best predictive multivariate model, I merely removed the categorical variables from the dataset and found the variable whose correlation with `price` was the highest. In this case, it was `carat`. We see that as `carat` increases, `price` does too, on average.  
+
+```{r}
+d <- diamonds[ ,-c(2, 3, 4, 11)]
+cor(d)
+```
+
+```{r}
+ggplot(diamonds) +
+  geom_point(mapping = aes(x = carat, y = price)) + 
+  geom_smooth(mapping = aes(x = carat, y = price), se = FALSE) +
+  labs(title = "Carat vs. Price of Diamonds",
+       x = "Carat",
+       y = "Price (dollars)")
+```
+
+Exploring the correlation of `carat` with `cut`, we find that "fair" diamonds have a larger `carat` value on average, and "ideal" diamonds having the lowest average `carat` value. However, we can see by the densities in the second plot that the "ideal" diamonds have the most positively skewed distribution while the other four categories have approximately the same skew. Correlation between `carat` and `cut` is mild at best.  
+
+```{r}
+diamonds %>%
+  select(carat, cut) %>%
+  ggplot(mapping = aes(x = cut, y = carat)) + 
+    geom_boxplot() +
+    coord_flip() +
+  labs(title = "Carat per Cut Rating of Diamonds",
+       x = "Carat",
+       y = "Cut")
+```
+
+```{r}
+diamonds %>%
+  select(carat, cut) %>%
+  ggplot(mapping = aes(x=carat, fill = cut)) + 
+    geom_density(stat = "density", alpha = 0.5, position = "identity") + 
+    facet_wrap(~ cut, nrow = 5) +
+  labs(title = "Carat per Cut of Diamonds",
+       x = "Carat",
+       y = "Density")
+```
+
+Finally, we will show the relationship between `price` and `cut` to piece everything together. We see the counter-intuitive relationship that as cut increases in quality, the average price drops. So, we can say that there is a mild trend of the following: as carat increases, cut decreases, and thus price increases.  
+
+```{r}
+diamonds %>%
+  select(price, cut) %>%
+  ggplot(mapping = aes(x = price, fill = cut)) + 
+    geom_density(stat = "density", alpha = 0.5, position = "identity") + 
+    facet_wrap(~ cut, nrow = 5) +
+  labs(title = "Price per Cut of Diamonds",
+       x = "Price (dollars)",
+       y = "Density")
+```
+
+*Question 3*  
+
+*Install the ggstance package, and create a horizontal boxplot. How does this compare to using `coord_flip()`?*  
+
+The following is from the previous question. We stripped the `coord_flip()` function out of the code so that the original version is displays. Following it, we use `coord_flip()`.
+
+```{r}
+diamonds %>%
+  select(carat, cut) %>%
+  ggplot(mapping = aes(x = cut, y = carat)) + 
+    geom_boxplot() +
+  labs(title = "Carat per Cut Rating of Diamonds",
+       x = "Carat",
+       y = "Cut")
+```
+
+```{r}
+diamonds %>%
+  select(carat, cut) %>%
+  ggplot(mapping = aes(x = cut, y = carat)) + 
+    geom_boxplot() +
+    coord_flip() +
+  labs(title = "Carat per Cut Rating of Diamonds",
+       x = "Carat",
+       y = "Cut")
+```
+
+A horizontal boxplot created with the `ggstance` package appears the same as a boxplot created with `ggplot2` with the `coord_flip()` option.  
+
+```{r}
+library(ggstance)
+diamonds %>%
+  select(carat, cut) %>%
+  ggplot(aes(carat, cut)) +
+    geom_boxploth()
+```
+
+*Exercise 4*  
+
+*One problem with boxplots is that they were developed in an era of much smaller datasets and tend to display a prohibitively large number of “outlying values”. One approach to remedy this problem is the letter value plot. Install the lvplot package, and try using geom_lv() to display the distribution of price vs cut. What do you learn? How do you interpret the plots?*  
+
+First, let's plot the boxplots with the `geom_boxplot()` appendage. The `geom_lv()` boxplot follows. In my opinion, both are abhorrent and density plots should be used instead. Both sets of boxplots show the high price variance in all cut categories with the highest median cost in the "fair" category. The "fair" category also has fewer outliers than the other categories, shown in the `geom_lv()` plot by a tube that tapers faster. This is hardly better than the other plot - the only benefit is that you can visually see the tapering if you look hard enough; in the standard boxplot, the density of the dots is such that you cannot tell how many outliers there really are.  
+
+```{r}
+diamonds %>%
+  select(price, cut) %>%
+  ggplot(mapping = aes(x = cut, y = price)) + 
+    geom_boxplot() +
+    coord_flip() +
+  labs(title = "Price per Cut Rating of Diamonds",
+       x = "Price (dollars)",
+       y = "Cut")
+```
+
+```{r}
+library(lvplot)
+diamonds %>%
+  select(price, cut) %>%
+  ggplot(mapping = aes(x = cut, y = price)) + 
+    geom_lv(mapping = aes(x = cut, y = price)) +
+    coord_flip() +
+  labs(title = "Price per Cut Rating of Diamonds",
+       x = "Price (dollars)",
+       y = "Cut")
+```
+
+*Exercise 5*  
+
+*Compare and contrast geom_violin() with a facetted geom_histogram(), or a coloured geom_freqpoly(). What are the pros and cons of each method?*  
+
+`geom_violin()` is below. Pros: Shows density as width; approximate variance is clear; extreme outlier distance shown. Cons: Specific points not shown, including quartiles or individual outliers; differences in frequencies between groups is lost.    
+
+```{r}
+diamonds %>%
+  select(carat, cut) %>%
+  ggplot(mapping = aes(x = cut, y = carat)) + 
+    geom_violin() +
+    coord_flip() +
+  labs(title = "Carat per Cut Rating of Diamonds",
+       x = "Cut",
+       y = "Carat")
+```
+
+Faceted `geom_histogram()` is below. Pros: Separates categories for clear side-by-side comparison; frequencies can be easily compared; binwidth can be manipulated for better understanding of distribution. Cons: Outliers too small to be seen/shown; if there are many groups, comparison in a grid could grow troublesome.  
+
+```{r}
+diamonds %>%
+  select(carat, cut) %>%
+  ggplot() + 
+    geom_histogram(mapping = aes(x = carat), binwidth = 0.05) +
+    facet_wrap(~ cut, nrow = 5) +
+  labs(title = "Carat per Cut Rating of Diamonds",
+       x = "Carat",
+       y = "Count")
+```
+
+`geom_freqpoly()` is below. Pros: Frequencies are directly compared; variance is clear, as well as outliers; colors help groups stand out. Cons: with many groups, the plot could get too crowded to interpret.      
+
+```{r}
+diamonds %>%
+  select(carat, cut) %>%
+  ggplot() + 
+    geom_freqpoly(mapping = aes(x = carat, color = cut), binwidth = 0.05) +
+    coord_cartesian(xlim = c(0, 3)) +
+  labs(title = "Carat per Cut Rating of Diamonds",
+       x = "Carat",
+       y = "Count")
+```
+
+*Exercise 6*  
+
+*If you have a small dataset, it’s sometimes useful to use geom_jitter() to see the relationship between a continuous and categorical variable. The ggbeeswarm package provides a number of methods similar to geom_jitter(). List them and briefly describe what each one does.*  
+
 ### Exercise 7.5.2.1
+
+*Exercise 1*  
 
 *How could you rescale the count dataset above to more clearly show the distribution of cut within colour, or colour within cut?*  
 
+I don't know what rescale means in this context, or how transforming the counts would produce a more informative plot, but the following visualization does a much better job at showing the distribution of counts within color categories, and how the distribution of the cuts peaks as color varies from colorless (D) to nearly faint color (J). We then show a similar plot, except featuring proportions within categories.  
+
 ```{r}
-diamonds %>% 
-  count(color, cut) %>%  
-  ggplot(mapping = aes(x = color, y = cut)) +
-    geom_tile(mapping = aes(fill = n))
+ggplot(data = diamonds) + 
+    geom_bar(mapping = aes(x = color, fill = cut), position = "dodge")
 ```
 
+```{r}
+# Redo plot above with proportions
+
+
+```
+
+*Exercise 2*  
+
+*Use geom_tile() together with dplyr to explore how average flight delays vary by destination and month of year. What makes the plot difficult to read? How could you improve it?*  
+
+*Exercise 3*  
+
+*Why is it slightly better to use aes(x = color, y = cut) rather than aes(x = cut, y = color) in the example above?*  
+
 ### Exercise 7.5.3.1
+
+*Exercise 1*  
+
+*Instead of summarising the conditional distribution with a boxplot, you could use a frequency polygon. What do you need to consider when using cut_width() vs cut_number()? How does that impact a visualisation of the 2d distribution of carat and price?*  
+
+*Exercise 2*  
+
+*Visualise the distribution of carat, partitioned by price.*  
+
+*Exercise 3*  
+
+*How does the price distribution of very large diamonds compare to small diamonds. Is it as you expect, or does it surprise you?*  
+
+*Exercise 4*  
+
+*Combine two of the techniques you’ve learned to visualise the combined distribution of cut, carat, and price.*  
+
+*Exercise 5*  
+
+*Two dimensional plots reveal outliers that are not visible in one dimensional plots. For example, some points in the plot below have an unusual combination of x and y values, which makes the points outliers even though their x and y values appear normal when examined separately.*  
+
+```{r}
+ggplot(data = diamonds) +
+  geom_point(mapping = aes(x = x, y = y)) +
+  coord_cartesian(xlim = c(4, 11), ylim = c(4, 11))
+```
+
+*Why is a scatterplot a better display than a binned plot for this case?*  
 
 ## Q3
 
