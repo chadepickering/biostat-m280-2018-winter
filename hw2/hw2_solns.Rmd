@@ -175,9 +175,118 @@ ggplot(diamonds) +
 
 ### Exercise 7.4.1
 
+*Question 1*  
+
+*What happens to missing values in a histogram? What happens to missing values in a bar chart? Why is there a difference?*  
+
+In a histogram, the rows where missing values are present are removed, and these values are not displayed.  
+
+```{r}
+diamonds2 <- diamonds %>% 
+  mutate(z = ifelse(z < 2 | z > 6, NA, z))
+
+all_z <- ggplot(diamonds) + 
+  geom_histogram(mapping = aes(x = z), binwidth = 0.05) +
+  labs(title = "Frequency of Heights of Diamonds",
+       subtitle = "All z values included",
+       x = "Depth (mm)",
+       y = "Frequency") +
+  coord_cartesian(xlim = c(5.5, 6.5), ylim = c(0, 50))
+
+most_z <- ggplot(diamonds2) + 
+  geom_histogram(mapping = aes(x = z), binwidth = 0.05) +
+  labs(title = "Frequency of Heights of Diamonds",
+       subtitle = "All z>6 excluded",
+       x = "Depth (mm)",
+       y = "Frequency") +
+  coord_cartesian(xlim = c(5.5, 6.5), ylim = c(0, 50))
+
+grid.arrange(all_z, most_z, nrow=2)
+```
+
+Here, we set all fair cut diamonds' "Cut" variable to NA and create bar plots. The category "Fair" is removed and replaced with the "NA" category, which has an identical count as "Fair" from the original dataset. This is because "NA" becomes an ordinal category, a factor; it is not removed from consideration in a bar plot.  
+
+```{r}
+diamonds3 <- diamonds %>% 
+  mutate(cut = replace(cut, cut=="Fair", NA))
+
+all_cut <- ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut)) +
+  labs(title = "Counts of Types of Diamond Cut",
+       subtitle = "All cuts included",
+       x = "Cut",
+       y = "Count")
+
+most_cut <- ggplot(data = diamonds3) + 
+  geom_bar(mapping = aes(x = cut)) +
+  labs(title = "Counts of Types of Diamond Cut",
+       subtitle = "Fair cuts excluded",
+       x = "Cut",
+       y = "Count")
+
+grid.arrange(all_cut, most_cut, nrow=2)
+```
+
+*Question 2*  
+
+What does `na.rm = TRUE` do in `mean()` and `sum()`?  
+
+Let's take the first 500 values of `x` in the length column and set all of the values over 6 to NA. Taking the mean or sum of the vector that includes the NAs gives NA because when adding NA into the sum, the result is not a numerical value. However, the denominator of the mean still counts all values, including the NAs. The function `na.rm()` strips all NA values from consideration, reducing the count of values in the mean as well.  
+
+```{r}
+x_vec <- diamonds$x[1:500]
+x_vec_na <- x_vec
+x_vec_na[x_vec_na > 6] <- NA
+c(mean(x_vec_na), sum(x_vec_na)) # na.rm = FALSE
+c(mean(x_vec_na, na.rm = TRUE), sum(x_vec_na, na.rm = TRUE))
+```
+
 ### Exercise 7.5.1.1
 
+*Use what you’ve learned to improve the visualisation of the departure times of cancelled vs. non-cancelled flights.*  
+
+In the improved visualization, we use superimposed density curves to analyze the approximate relative frequency of departing (non-cancelled) flights compared to cancelled flights. We see given a flight is cancelled, it is likely that its departure time was between about 2-8pm rather than earlier in the day. We can see that the proportion of non-cancelled flights is bimodal, peaking in the early-mid morning, and again later in the day, while there are a low relative proportion of cancelled flights early in the day and a high relative proportion later in the day (compared to non-cancelled flights).  
+
+```{r}
+library(nycflights13)
+
+# # Density - frequency-based
+# flights %>%
+#   mutate(
+#     cancelled = is.na(dep_time),
+#     sched_hour = sched_dep_time %/% 100,
+#     sched_min = sched_dep_time %% 100,
+#     sched_dep_time = sched_hour + sched_min / 60
+#   ) %>% 
+#   ggplot(mapping = aes(x = sched_dep_time, y = ..density..)) + 
+#     geom_freqpoly(mapping = aes(colour = cancelled), binwidth = 1/2)
+
+# Density - smoothed (preferred)
+flights %>%
+  mutate(
+    cancelled = is.na(dep_time),
+    sched_hour = sched_dep_time %/% 100,
+    sched_min = sched_dep_time %% 100,
+    sched_dep_time = sched_hour + sched_min / 60
+  ) %>% 
+  ggplot(mapping = aes(x=sched_dep_time, fill = cancelled)) +
+    geom_density(stat = "density", alpha = 0.4, position = "identity") +
+    labs(title = "Densities of Cancelled and Non-cancelled Flights",
+       subtitle = "Proportions relative to groups",
+       x = "Hour",
+       y = "Density")
+```
+
 ### Exercise 7.5.2.1
+
+*How could you rescale the count dataset above to more clearly show the distribution of cut within colour, or colour within cut?*  
+
+```{r}
+diamonds %>% 
+  count(color, cut) %>%  
+  ggplot(mapping = aes(x = color, y = cut)) +
+    geom_tile(mapping = aes(fill = n))
+```
 
 ### Exercise 7.5.3.1
 
