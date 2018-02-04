@@ -404,7 +404,7 @@ diamonds %>%
 
 *Exercise 5*  
 
-*Compare and contrast geom_violin() with a facetted geom_histogram(), or a coloured geom_freqpoly(). What are the pros and cons of each method?*  
+*Compare and contrast `geom_violin()` with a facetted `geom_histogram()`, or a coloured `geom_freqpoly()`. What are the pros and cons of each method?*  
 
 `geom_violin()` is below. Pros: Shows density as width; approximate variance is clear; extreme outlier distance shown. Cons: Specific points not shown, including quartiles or individual outliers; differences in frequencies between groups is lost.    
 
@@ -449,6 +449,16 @@ diamonds %>%
 
 *If you have a small dataset, it’s sometimes useful to use geom_jitter() to see the relationship between a continuous and categorical variable. The ggbeeswarm package provides a number of methods similar to geom_jitter(). List them and briefly describe what each one does.*  
 
+NEEDS WORK
+
+In the function `geom_beeswarm()`, the argument `groupOnX` adds jitter to the x axis if TRUE.
+
+```{r}
+library(ggbeeswarm)
+d_sub <- sample_n(diamonds, 50, replace = FALSE)
+
+```
+
 ### Exercise 7.5.2.1
 
 *Exercise 1*  
@@ -472,9 +482,29 @@ ggplot(data = diamonds) +
 
 *Use geom_tile() together with dplyr to explore how average flight delays vary by destination and month of year. What makes the plot difficult to read? How could you improve it?*  
 
+The number of destinations listed makes this plot impossible to read. The only information you can get from this is that delays increase in the summer months and in December in general across all regions. An improvement is below.  
+
+```{r}
+summarise(group_by(flights, dest, month), delay = mean(dep_delay, na.rm = TRUE)) %>%
+  ggplot(mapping = aes(x = month, y = dest)) + 
+    geom_tile(mapping = aes(fill = delay)) +
+  labs(title = "Price per Cut Rating of Diamonds",
+       x = "Price (dollars)",
+       y = "Cut")
+```
+
 *Exercise 3*  
 
-*Why is it slightly better to use aes(x = color, y = cut) rather than aes(x = cut, y = color) in the example above?*  
+*Why is it slightly better to use `aes(x = color, y = cut)` rather than `aes(x = cut, y = color)` in the example above?*  
+
+Using the latter, we see that the colors are ordered in reverse and that the area of the individual boxes are less square because of the number of categories relative to the shape of the entire plot.  
+
+```{r}
+diamonds %>% 
+  count(color, cut) %>%  
+  ggplot(mapping = aes(x = cut, y = color)) +
+    geom_tile(mapping = aes(fill = n))
+```
 
 ### Exercise 7.5.3.1
 
