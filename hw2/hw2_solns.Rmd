@@ -579,18 +579,43 @@ ggplot(data = diamonds, mapping = aes(x = price, y = carat)) +
 
 *How does the price distribution of very large diamonds compare to small diamonds. Is it as you expect, or does it surprise you?*  
 
+The largest 10% of diamonds have a median price of about 13000 dollars with a rather high variance and a mildly negatively skewed distribution. The smallest 10% of diamonds have a median price of about 1000 dollars with a positively skewed distribution and prices concentrated below 2500 dollars. This seems fairly expected.  
+
+```{r}
+ggplot(data = diamonds, mapping = aes(x = carat, y = price)) + 
+  geom_boxplot(mapping = aes(group = cut_number(carat, 10))) +
+  labs(title = "Distribution of Price of Diamonds",
+       subtitle = "Carat bins of 0.5",
+       x = "Carat",
+       y = "Cost (dollars)")
+```
+
+If we study the distributions of the boxplots when `carat` is divided in half-carat increments, we see that for diamonds with size 2 carats or higher, the median hits a peak and stabilizes while the variance decreases as carat increases.   
+
 ```{r}
 ggplot(data = diamonds, mapping = aes(x = carat, y = price)) + 
   geom_boxplot(mapping = aes(group = cut_width(carat, 0.5))) +
   labs(title = "Distribution of Price of Diamonds",
        subtitle = "Carat bins of 0.5",
-       x = "Cost (dollars)",
-       y = "Carat")
+       x = "Carat",
+       y = "Cost (dollars)")
 ```
 
 *Exercise 4*  
 
 *Combine two of the techniques you’ve learned to visualise the combined distribution of cut, carat, and price.*  
+
+Combining the techniques of using `cut_width()` with boxplots and facet wrapping, we can see clearly the distributions of price vs. carat value per cut type.  
+
+```{r}
+ggplot(data = diamonds, mapping = aes(x = carat, y = price)) + 
+  geom_boxplot(mapping = aes(group = cut_width(carat, 0.5))) +
+  facet_wrap(~ cut, nrow = 2) +
+  labs(title = "Distribution of Price of Diamonds",
+       subtitle = "Carat bins of 0.5",
+       x = "Carat",
+       y = "Cost (dollars)")
+```
 
 *Exercise 5*  
 
@@ -603,6 +628,8 @@ ggplot(data = diamonds) +
 ```
 
 *Why is a scatterplot a better display than a binned plot for this case?*  
+
+Looking at the above plot in, say, a univariate boxplot of X or Y will show approximately the same distribution (about the same median and IQR) with the few exceptions of the occasional outliers. If we take an X that is well within the domain of points observed, 6.6 for example, we notice that most Y  observations occur around 6.6, but some occur between 4 and 6. Without a bivariate plot, the conditional distributions, X|Y and Y|X, are lost; only observations that are outliers in the design space (X) or outliers in Y are indicated separately. It is necessary to look at how the variables covary to spot real outliers, those that are unusual in one dimension when you interpolate within the range of the other.  
 
 ## Q3
 
