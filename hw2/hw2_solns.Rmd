@@ -482,7 +482,7 @@ ggplot(data = diamonds) +
 
 *Use geom_tile() together with dplyr to explore how average flight delays vary by destination and month of year. What makes the plot difficult to read? How could you improve it?*  
 
-The number of destinations listed makes this plot impossible to read. The only information you can get from this is that delays increase in the summer months and in December in general across all regions. An improvement is below.  
+The number of destinations listed makes this plot impossible to read (just below). The only information you can get from this is that delays increase in the summer months and in December in general across all regions. An improvement is below - I make 4 plots to spread out the rows instead of having a more compact version. We could also make a plot using `geom_freqpoly()` and separate out the destinations with a facet wrap.  
 
 ```{r}
 summarise(group_by(flights, dest, month), delay = mean(dep_delay, na.rm = TRUE)) %>%
@@ -492,6 +492,47 @@ summarise(group_by(flights, dest, month), delay = mean(dep_delay, na.rm = TRUE))
        x = "Price (dollars)",
        y = "Cut")
 ```
+
+```{r}
+tile_a <- summarise(group_by(flights, dest, month), delay = mean(dep_delay, na.rm = TRUE)) %>%
+  filter(grepl('^[A-D]', dest)) %>%
+  ggplot(mapping = aes(x = month, y = dest)) + 
+    geom_tile(mapping = aes(fill = delay)) +
+  labs(title = "Average Delay per Destination per Month",
+       x = "Month",
+       y = "Destination")
+```
+
+```{r}
+tile_b <- summarise(group_by(flights, dest, month), delay = mean(dep_delay, na.rm = TRUE)) %>%
+  filter(grepl('^[E-L]', dest)) %>%
+  ggplot(mapping = aes(x = month, y = dest)) + 
+    geom_tile(mapping = aes(fill = delay)) +
+  labs(title = "Average Delay per Destination per Month",
+       x = "Month",
+       y = "Destination")
+```
+
+```{r}
+tile_c <- summarise(group_by(flights, dest, month), delay = mean(dep_delay, na.rm = TRUE)) %>%
+  filter(grepl('^[M-R]', dest)) %>%
+  ggplot(mapping = aes(x = month, y = dest)) + 
+    geom_tile(mapping = aes(fill = delay)) +
+  labs(title = "Average Delay per Destination per Month",
+       x = "Month",
+       y = "Destination")
+```
+
+```{r}
+tile_d <- summarise(group_by(flights, dest, month), delay = mean(dep_delay, na.rm = TRUE)) %>%
+  filter(grepl('^[S-Z]', dest)) %>%
+  ggplot(mapping = aes(x = month, y = dest)) + 
+    geom_tile(mapping = aes(fill = delay)) +
+  labs(title = "Average Delay per Destination per Month",
+       x = "Month",
+       y = "Destination")
+```
+
 
 *Exercise 3*  
 
@@ -512,13 +553,40 @@ diamonds %>%
 
 *Instead of summarising the conditional distribution with a boxplot, you could use a frequency polygon. What do you need to consider when using cut_width() vs cut_number()? How does that impact a visualisation of the 2d distribution of carat and price?*  
 
+```{r}
+ggplot(diamonds) + 
+  geom_freqpoly(mapping = aes(x = price), binwidth = 500) +
+  labs(title = "Frequency of Prices of Diamonds",
+       subtitle = "Bin width = $500",
+       x = "Cost (dollars)",
+       y = "Frequency")
+```
+
 *Exercise 2*  
 
 *Visualise the distribution of carat, partitioned by price.*  
 
+```{r}
+ggplot(data = diamonds, mapping = aes(x = price, y = carat)) + 
+  geom_boxplot(mapping = aes(group = cut_width(price, 1000))) +
+  labs(title = "Distribution of Carat of Diamonds",
+       subtitle = "Price bins of $1000",
+       x = "Cost (dollars)",
+       y = "Carat")
+```
+
 *Exercise 3*  
 
 *How does the price distribution of very large diamonds compare to small diamonds. Is it as you expect, or does it surprise you?*  
+
+```{r}
+ggplot(data = diamonds, mapping = aes(x = carat, y = price)) + 
+  geom_boxplot(mapping = aes(group = cut_width(carat, 0.5))) +
+  labs(title = "Distribution of Price of Diamonds",
+       subtitle = "Carat bins of 0.5",
+       x = "Cost (dollars)",
+       y = "Carat")
+```
 
 *Exercise 4*  
 
