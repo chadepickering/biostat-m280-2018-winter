@@ -9,9 +9,29 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r, echo=FALSE}
 if (!"gridExtra" %in% rownames(installed.packages())){
   install.packages("gridExtra", repos="http://cran.rstudio.com/")
+}
+
+if (!"viridis" %in% rownames(installed.packages())){
+  install.packages("viridis", repos="http://cran.rstudio.com/")
+}
+
+if (!"lvplot" %in% rownames(installed.packages())){
+  install.packages("lvplot", repos="http://cran.rstudio.com/")
+}
+
+if (!"nycflights13" %in% rownames(installed.packages())){
+  install.packages("nycflights13", repos="http://cran.rstudio.com/")
+}
+
+if (!"ggstance" %in% rownames(installed.packages())){
+  install.packages("ggstance", repos="http://cran.rstudio.com/")
+}
+
+if (!"ggbeeswarm" %in% rownames(installed.packages())){
+  install.packages("ggbeeswarm", repos="http://cran.rstudio.com/")
 }
 ```
 
