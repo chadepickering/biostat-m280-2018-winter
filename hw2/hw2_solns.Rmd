@@ -1,5 +1,5 @@
 ---
-title: "BIOSTAT M280 HW2"
+title: "BIOSTAT 203B: HW2 #1"
 author: "Chad Pickering"
 date: "2/16/2018"
 output: html_document
@@ -646,11 +646,26 @@ Looking at the above plot in, say, a univariate boxplot of X or Y will show appr
 
 Redo HW1 Q2 using functions in tidyverse:  
 
+```{r}
+bim <- read_tsv("/home/m280-data/hw1/merge-geno.bim", col_names = FALSE)
+fam <- read_delim("/home/m280-data/hw1/merge-geno.fam", col_names = FALSE, delim = " ")
+```
+
 ### Question 1.  
 
 **How many persons are in the data set (statisticians call this `n`)?**  
 
+```{r}
+bim_tibble <- as_tibble(bim)
+fam_tibble <- as_tibble(fam)
+c(count(bim_tibble), c(fam_tibble))
+```
+
 Assuming each row is a unique person, we find **959** people (the command `uniq` is used anyway, just in case).  
+
+```{r}
+
+```
 
 **How many SNPs are in the data set (statisticians call this `p`)?**  
 

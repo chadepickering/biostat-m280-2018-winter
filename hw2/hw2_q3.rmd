@@ -1,0 +1,69 @@
+---
+title: 'BIOSTAT 203B: HW2 #3'
+author: "Chad Pickering"
+date: "2/16/2018"
+output: html_document
+---
+
+## Q3
+
+Redo HW1 Q2 using functions in tidyverse:  
+
+```{r}
+bim <- read_tsv("/home/m280-data/hw1/merge-geno.bim", col_names = FALSE)
+fam <- read_delim("/home/m280-data/hw1/merge-geno.fam", col_names = FALSE, delim = " ")
+```
+
+### Question 1.  
+
+**How many persons are in the data set (statisticians call this `n`)?**  
+
+```{r}
+bim_tibble <- as_tibble(bim)
+fam_tibble <- as_tibble(fam)
+c(count(bim_tibble), c(fam_tibble))
+```
+
+Assuming each row is a unique person, we find **959** people (the command `uniq` is used anyway, just in case).  
+
+```{r}
+
+```
+
+**How many SNPs are in the data set (statisticians call this `p`)?**  
+
+Assuming each row is a unique SNP, we find **8348674** SNPs (the command `uniq` is used anyway, just in case).
+
+### Question 2.  
+
+**Which chromosomes does this data set contain?**  
+
+
+
+**How many SNPs are in each chromosome?** 
+
+
+
+### Question 3.  
+
+**MAP4 (microtubule-associated protein 4) is a gene on chromosome 3 spanning positions 47,892,180 bp -- 48,130,769 bp. How many SNPs are located within MAP4 gene?**  
+
+
+
+**894** SNPs are located within the MAP4 gene.  
+
+### Question 4.
+
+**Statistical geneticists often have to reformat a data set to feed into various analysis programs. For example, to use the Mendel software we have to reformat the data set to be read by Mendel. Mendel's SNP definition file is similar to the plink `bim` file but has format `SNP ID`, `Chromosome`, `Base Pair Position` with each field separated by a comma. Write a Linux shell command to convert `merge-geno.bim` to Mendel SNP definition file.**   
+      
+
+    
+**Mendel's pedigree file is similar to the plink `fam` file but has format `Family ID`, `Person ID`, `Father ID`, `Mother ID`, `Sex` coded as M or F, `Twin Status` with each field separated by a comma. Write a Linux shell command to convert `merge-geno.fam` to Mendel pedigree file. Since twin status is not available in plink format, we put nothing for that field. Also Mendel limits Person ID to have length less than or equal to 8 characters, so we have to strip the string `T2DG` from the IDs.**  
+
+
+
+
+
+```{r}
+
+```
