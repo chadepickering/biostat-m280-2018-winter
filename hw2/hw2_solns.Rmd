@@ -47,6 +47,7 @@ We first plot the frequencies of measurements (in mm) of the three dimensions. W
 
 ```{r, message=FALSE}
 library(tidyverse)
+library(dplyr)
 library(viridis)
 library(gridExtra)
 library(lvplot)
@@ -256,14 +257,6 @@ What does `na.rm = TRUE` do in `mean()` and `sum()`?
 
 Let's take the first 500 values of `x` in the length column and set all of the values over 6 to NA. Taking the mean or sum of the vector that includes the NAs gives NA because when adding NA into the sum, the result is not a numerical value. However, the denominator of the mean still counts all values, including the NAs. The function `na.rm()` strips all NA values from consideration before calculating the mean or sum.  
 
-```{r}
-x_vec <- diamonds$x[1:500]
-x_vec_na <- x_vec
-x_vec_na[x_vec_na > 6] <- NA
-c(mean(x_vec_na), sum(x_vec_na)) # na.rm = FALSE
-c(mean(x_vec_na, na.rm = TRUE), sum(x_vec_na, na.rm = TRUE))
-```
-
 ### Exercise 7.5.1.1
 
 #### Question 1  
@@ -389,7 +382,7 @@ diamonds %>%
 
 *One problem with boxplots is that they were developed in an era of much smaller datasets and tend to display a prohibitively large number of “outlying values”. One approach to remedy this problem is the letter value plot. Install the lvplot package, and try using geom_lv() to display the distribution of price vs cut. What do you learn? How do you interpret the plots?*  
 
-First, let's plot the boxplots with the `geom_boxplot()` appendage. The `geom_lv()` boxplot follows. In my opinion, both are abhorrent and density plots should be used instead. Both sets of boxplots show the high price variance in all cut categories with the highest median cost in the "fair" category. The "fair" category also has fewer outliers than the other categories, shown in the `geom_lv()` plot by a tube that tapers faster. This is hardly better than the other plot - the only benefit is that you can visually see the tapering if you look hard enough because there are more quantiles shown (but are very difficult to see especially in the left tail); in the standard boxplot, the density of the dots is such that you cannot tell how many outliers there really are.  
+First, let's plot the boxplots with the `geom_boxplot()` appendage. The `geom_lv()` boxplot follows. In my opinion, if colors are not used, both are abhorrent and density plots should be used instead. Color certainly improves the lvplot(). Both sets of boxplots show the high price variance in all cut categories with the highest median cost in the "fair" category. The "fair" category also has fewer outliers than the other categories, shown in the `geom_lv()` plot by a tube that tapers faster. You can visually see the tapering because there are more quantiles shown (deciles); in the standard boxplot, the density of the dots is such that you cannot tell how many outliers there really are.  
 
 ```{r}
 diamonds %>%
@@ -405,7 +398,8 @@ diamonds %>%
 diamonds %>%
   select(price, cut) %>%
   ggplot(mapping = aes(x = cut, y = price)) + 
-    geom_lv(mapping = aes(x = cut, y = price)) +
+    geom_lv(aes(fill=..LV..), k=9) +
+    scale_fill_brewer(palette = "Reds")
   labs(title = "Price per Cut Rating of Diamonds",
        x = "Cut",
        y = "Price (dollars)")
