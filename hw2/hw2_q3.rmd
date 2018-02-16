@@ -5,40 +5,35 @@ date: "2/16/2018"
 output: html_document
 ---
 
-## Q3
+## Q3  
+
+### Question 1.  
 
 Redo HW1 Q2 using functions in tidyverse:  
 
 ```{r}
+library(readr)
+library(dplyr)
 bim <- read_tsv("/home/m280-data/hw1/merge-geno.bim", col_names = FALSE)
-fam <- read_delim("/home/m280-data/hw1/merge-geno.fam", col_names = FALSE, delim = " ")
-```
-
-### Question 1.  
-
-**How many persons are in the data set (statisticians call this `n`)?**  
-
-```{r}
 bim_tibble <- as_tibble(bim)
+fam <- read_delim("/home/m280-data/hw1/merge-geno.fam", col_names = FALSE, delim = " ")
 fam_tibble <- as_tibble(fam)
-c(count(bim_tibble), c(fam_tibble))
+count(bim_tibble)$n
 ```
-
-Assuming each row is a unique person, we find **959** people (the command `uniq` is used anyway, just in case).  
 
 ```{r}
-
+count(fam_tibble)$n
 ```
 
-**How many SNPs are in the data set (statisticians call this `p`)?**  
-
-Assuming each row is a unique SNP, we find **8348674** SNPs (the command `uniq` is used anyway, just in case).
+Assuming each row is a unique person, we find **959** people. Assuming each row is a unique SNP, we find **8348674** SNPs (the command `uniq` is used anyway, just in case).  
 
 ### Question 2.  
 
 **Which chromosomes does this data set contain?**  
 
+```{r}
 
+```
 
 **How many SNPs are in each chromosome?** 
 
