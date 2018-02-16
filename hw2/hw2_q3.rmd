@@ -11,13 +11,16 @@ output: html_document
 
 Redo HW1 Q2 using functions in tidyverse:  
 
-```{r}
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 if (!"gridExtra" %in% rownames(installed.packages())){
   install.packages("gridExtra", repos="http://cran.rstudio.com/")
 }
 
 library(readr)
-library(dplyr)
+library(tidyverse)
+```
+
+```{r, warning=FALSE, message=FALSE}
 bim <- read_tsv("/home/m280-data/hw1/merge-geno.bim", col_names = FALSE)
 bim_tibble <- as_tibble(bim)
 fam <- read_delim("/home/m280-data/hw1/merge-geno.fam", 
@@ -71,11 +74,27 @@ write_lines(def_text, "hw2_def_file.txt")
 write_delim(def_subset, "hw2_def_file.txt", delim = ",", 
             col_names = FALSE, append = TRUE)
 ```
+
+```{bash}
+head -10 hw2_def_file.txt
+```
     
 **Mendel's pedigree file is similar to the plink `fam` file but has format `Family ID`, `Person ID`, `Father ID`, `Mother ID`, `Sex` coded as M or F, `Twin Status` with each field separated by a comma. Write a Linux shell command to convert `merge-geno.fam` to Mendel pedigree file. Since twin status is not available in plink format, we put nothing for that field. Also Mendel limits Person ID to have length less than or equal to 8 characters, so we have to strip the string `T2DG` from the IDs.**  
 
 Please see the text file created.  
 
 ```{r}
+ped_text <- fam_tibble %>% mutate(X2 = str_replace(X2, "^T2DG", ""),
+                                  X3 = str_replace(X3, "^T2DG", ""),
+                                  X4 = str_replace(X4, "^T2DG", ""),
+                                  X3 = str_replace(X3, "0", ""),
+                                  X4 = str_replace(X4, "0", ""),
+                                  X5 = if_else(X5 == 1, "M", "F"),
+                                  X6 = if_else(X6 == 0, "", as.character(X6)))
+write_delim(ped_text, "hw2_ped_file.txt", delim = ",", 
+            col_names = FALSE, append = TRUE)
+```
 
+```{bash}
+head -10 hw2_ped_file.txt
 ```
