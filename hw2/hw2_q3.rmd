@@ -12,11 +12,16 @@ output: html_document
 Redo HW1 Q2 using functions in tidyverse:  
 
 ```{r}
+if (!"gridExtra" %in% rownames(installed.packages())){
+  install.packages("gridExtra", repos="http://cran.rstudio.com/")
+}
+
 library(readr)
 library(dplyr)
 bim <- read_tsv("/home/m280-data/hw1/merge-geno.bim", col_names = FALSE)
 bim_tibble <- as_tibble(bim)
-fam <- read_delim("/home/m280-data/hw1/merge-geno.fam", col_names = FALSE, delim = " ")
+fam <- read_delim("/home/m280-data/hw1/merge-geno.fam", 
+                  col_names = FALSE, delim = " ")
 fam_tibble <- as_tibble(fam)
 count(bim_tibble)$n
 ```
@@ -56,13 +61,20 @@ bim_tibble %>%
 
 **Statistical geneticists often have to reformat a data set to feed into various analysis programs. For example, to use the Mendel software we have to reformat the data set to be read by Mendel. Mendel's SNP definition file is similar to the plink `bim` file but has format `SNP ID`, `Chromosome`, `Base Pair Position` with each field separated by a comma. Write a Linux shell command to convert `merge-geno.bim` to Mendel SNP definition file.**   
       
-
+Please see the text file created.       
+      
+```{r}
+def_subset <- select(bim_tibble, X2, X1, X4)
+def_text <- 
+  "2.40=FILE FORMAT VERSION NUMBER.\n8348674=NUMBER OF SNPS LISTED HERE."
+write_lines(def_text, "hw2_def_file.txt")
+write_delim(def_subset, "hw2_def_file.txt", delim = ",", 
+            col_names = FALSE, append = TRUE)
+```
     
 **Mendel's pedigree file is similar to the plink `fam` file but has format `Family ID`, `Person ID`, `Father ID`, `Mother ID`, `Sex` coded as M or F, `Twin Status` with each field separated by a comma. Write a Linux shell command to convert `merge-geno.fam` to Mendel pedigree file. Since twin status is not available in plink format, we put nothing for that field. Also Mendel limits Person ID to have length less than or equal to 8 characters, so we have to strip the string `T2DG` from the IDs.**  
 
-
-
-
+Please see the text file created.  
 
 ```{r}
 
