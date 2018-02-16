@@ -29,23 +29,28 @@ Assuming each row is a unique person, we find **959** people. Assuming each row 
 
 ### Question 2.  
 
-**Which chromosomes does this data set contain?**  
+**Which chromosomes does this data set contain, and how many SNPs in each?**  
 
 ```{r}
-
+bim_tibble %>%
+  group_by(X1) %>%
+  summarise(X2 = n_distinct(X2)) %>%
+  arrange(X1)
 ```
-
-**How many SNPs are in each chromosome?** 
-
 
 
 ### Question 3.  
 
 **MAP4 (microtubule-associated protein 4) is a gene on chromosome 3 spanning positions 47,892,180 bp -- 48,130,769 bp. How many SNPs are located within MAP4 gene?**  
 
-
+```{r}
+bim_tibble %>% 
+  filter(X1 == 3, X4 >= 47892180, X4 <= 48130769) %>%
+  summarise(X2 = n_distinct(X2))
+```
 
 **894** SNPs are located within the MAP4 gene.  
+
 
 ### Question 4.
 
