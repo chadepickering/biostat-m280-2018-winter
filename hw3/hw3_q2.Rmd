@@ -1,0 +1,125 @@
+---
+title: 'BIOSTAT 203B: Homework 3'
+author: "Chad Pickering"
+date: "3/2/2018"
+output: html_document
+---
+
+## Question 2. 
+
+First, connect to the database, which only contains one table, called `latix`.
+
+```{r}
+if (!"anytime" %in% rownames(installed.packages())){
+  install.packages("anytime", repos="http://cran.rstudio.com/")
+}
+
+library(DBI)
+library(RSQLite)
+library(tidyverse)
+library(dplyr)
+library(lubridate)
+library(anytime)
+
+park <- dbConnect(RSQLite::SQLite(), 
+                 "/home/m280-data/la_parking/LA_Parking_Citations.sqlite")
+```
+
+```{r}
+sample_park <- dbSendQuery(park, "SELECT * FROM latix LIMIT 5")
+dbFetch(sample_park)
+```
+
+### 1. How many tickets are in this data set? Which time period do these tickets span? Which years have most data?
+
+```{r}
+tickets <- dbSendQuery(park, "SELECT COUNT(DISTINCT(Ticket_number)) AS total_tickets
+                   FROM latix")
+dbFetch(tickets)
+```
+
+There are **4044338 tickets** in the dataset. 
+
+```{r}
+time_period <- dbSendQuery(park, 
+            "SELECT MIN(Issue_DateTime) AS min, MAX(Issue_DateTime) AS max
+                FROM latix")
+date_tbl <- dbFetch(time_period)
+c(as_datetime(date_tbl[1, 1]), as_datetime(date_tbl[1, 2]))
+```
+
+The earliest recorded ticket in the dataset was given on **April 27, 2010**. The latest recorded ticket in the dataset was given on **December 29, 2017**.  
+
+```{r}
+all_dates <- dbSendQuery(park, 
+            "SELECT Issue_DateTime FROM latix")
+dates_vect <- dbFetch(all_dates)
+dates_vect[,1] <- as_datetime(dates_vect[,1])
+dates_vect$Issue_DateTime %>% year() %>% table()
+```
+
+The most tickets in the dataset were given in **2015**, closely followed by **2016**.  
+
+### 2. When (which hour, weekday, month day, and month) are you most likely to get a ticket and when are you least likely to get a ticket?
+
+First, make relevant variables. Then, let's zoom in on where most of the data is and see if we can see a pattern.  
+
+```{r}
+dates_vect %>% 
+  mutate(date_full = date(Issue_DateTime),
+        date_day = day(Issue_DateTime),
+        date_month = month(Issue_DateTime),
+        date_year = year(Issue_DateTime),
+        date_wday = wday(Issue_DateTime, label=TRUE)) %>%
+  group_by(date_full) %>% 
+  summarize(n = n()) %>%
+  ggplot(aes(x = date_full, y = n)) + 
+    geom_line() +
+    xlim(mdy("11/1/2014"), mdy("11/1/2016")) +
+    ylim(0, 10000)
+  
+```
+
+Plot each of the marginal frequencies next.  
+
+It looks like between 1am and 6am is the most popular time for parking tickets to be given. Afternoon and evening hours are rather infrequent times for ticketing activities on the whole.  
+
+```{r}
+ggplot(data = dates_vect) + 
+  geom_bar(mapping = aes(x = )) +
+  labs(title = "Frequency of Parking Tickets Given per Hour in LA",
+       x = "Hour",
+       y = "Frequency")
+```
+
+```{r}
+dates_vect %>% 
+  count(year, month, day) %>%
+  arrange(year, month, day) %>%
+  ggplot(mapping = aes(x = month, y = year)) +
+  geom_freqpoly() +
+  labs(title = "Proportion of Cut within Color",
+       x = "Color",
+       y = "Cut")
+
+ggplot(data = dates_vect) + 
+  geom_bar(mapping = aes(x = month)) +
+  labs(title = "Frequency of Parking Tickets Given per Month in LA",
+       x = "Hour",
+       y = "Frequency")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
