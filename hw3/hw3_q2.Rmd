@@ -10,116 +10,273 @@ output: html_document
 First, connect to the database, which only contains one table, called `latix`.
 
 ```{r}
-if (!"anytime" %in% rownames(installed.packages())){
-  install.packages("anytime", repos="http://cran.rstudio.com/")
-}
-
 library(DBI)
 library(RSQLite)
 library(tidyverse)
 library(dplyr)
 library(lubridate)
-library(anytime)
 
 park <- dbConnect(RSQLite::SQLite(), 
                  "/home/m280-data/la_parking/LA_Parking_Citations.sqlite")
-```
 
-```{r}
-sample_park <- dbSendQuery(park, "SELECT * FROM latix LIMIT 5")
-dbFetch(sample_park)
+la_tix <- dplyr::tbl(park, "latix")
 ```
 
 ### 1. How many tickets are in this data set? Which time period do these tickets span? Which years have most data?
 
 ```{r}
-tickets <- dbSendQuery(park, "SELECT COUNT(DISTINCT(Ticket_number)) AS total_tickets
-                   FROM latix")
-dbFetch(tickets)
+la_tix %>%
+  summarize("Num Tickets" = n_distinct(Ticket_number)) %>%
+  collect()
 ```
 
-There are **4044338 tickets** in the dataset. 
+There are **4044338 distinct ticket numbers** in the dataset (and **4044488** rows, perhaps 150 tickets did not have reported numbers).  
 
-```{r}
-time_period <- dbSendQuery(park, 
-            "SELECT MIN(Issue_DateTime) AS min, MAX(Issue_DateTime) AS max
-                FROM latix")
-date_tbl <- dbFetch(time_period)
-c(as_datetime(date_tbl[1, 1]), as_datetime(date_tbl[1, 2]))
+```{r, warning=FALSE, message=FALSE}
+la_tix %>%
+  select(Issue_DateTime) %>%
+  summarise(min_date = datetime(min(Issue_DateTime), 
+                                'unixepoch', 'localtime'), 
+            max_date = datetime(max(Issue_DateTime), 
+                                'unixepoch', 'localtime')) %>%
+  collect()
 ```
 
 The earliest recorded ticket in the dataset was given on **April 27, 2010**. The latest recorded ticket in the dataset was given on **December 29, 2017**.  
 
-```{r}
-all_dates <- dbSendQuery(park, 
-            "SELECT Issue_DateTime FROM latix")
-dates_vect <- dbFetch(all_dates)
-dates_vect[,1] <- as_datetime(dates_vect[,1])
-dates_vect$Issue_DateTime %>% year() %>% table()
+```{r, warning=FALSE, message=FALSE}
+la_tix %>%
+  mutate(Issue_DateTime = datetime(Issue_DateTime, 
+                                   'unixepoch', 'localtime')) %>%
+  mutate(year = strftime('%Y', Issue_DateTime)) %>%
+  group_by(year) %>%
+  summarize("Year" = n()) %>%
+  collect()
 ```
 
 The most tickets in the dataset were given in **2015**, closely followed by **2016**.  
 
 ### 2. When (which hour, weekday, month day, and month) are you most likely to get a ticket and when are you least likely to get a ticket?
 
-First, make relevant variables. Then, let's zoom in on where most of the data is and see if we can see a pattern.  
+We create relevant variables for each plot. For the first, let's zoom in on where most of the data is and see if we can see a pattern. Zooming in on November 2014 to November 2016, we can see that there is a weekly seasonality component that is relatively constant throughout the year. It seems as if this database only contains complete records for January 2015 through a portion of October 2016.  
 
 ```{r}
-dates_vect %>% 
-  mutate(date_full = date(Issue_DateTime),
-        date_day = day(Issue_DateTime),
-        date_month = month(Issue_DateTime),
-        date_year = year(Issue_DateTime),
-        date_wday = wday(Issue_DateTime, label=TRUE)) %>%
-  group_by(date_full) %>% 
-  summarize(n = n()) %>%
-  ggplot(aes(x = date_full, y = n)) + 
+la_tix %>% ### GENERAL TREND
+  mutate(Issue_DateTime = datetime(Issue_DateTime, 
+                                   'unixepoch', 'localtime')) %>%
+  mutate(weekday = strftime('%w', Issue_DateTime),
+    year = strftime('%Y', Issue_DateTime),
+    month = strftime('%m', Issue_DateTime),
+    day = strftime('%d', Issue_DateTime),
+    hour = strftime('%H', Issue_DateTime)) %>%
+  select(Issue_DateTime) %>%
+  group_by(Issue_DateTime) %>%
+  summarize("n" = n()) %>%
+  collect() %>%
+  ggplot(aes(x = Issue_DateTime, y = n)) + 
     geom_line() +
-    xlim(mdy("11/1/2014"), mdy("11/1/2016")) +
-    ylim(0, 10000)
-  
+    xlim() + # HOW DO I SET XLIM xlim(mdy("7/1/2013"), mdy("6/30/2014"))
+    labs(title = "Frequency of Parking Tickets Given per Day in LA",
+       x = "Date",
+       y = "Frequency")
+
+
 ```
 
-Plot each of the marginal frequencies next.  
+In terms of month, we only have one full year of complete data (2015), so we can only safely analyze one year. Analyzing 2015 and 2016 would mean that October 2016 (incomplete data) and November and December 2016 (very sparse data) would influence the plot and interpretation. Overall, it looks like about 170000-190000 tickets are given per month, with some natural variability; perhaps tickets are given a little bit more often in the summer months relative to the winter months.  
+
+```{r}
+la_tix %>% ### MONTH - LIMIT TO 2015 (ONLY FULL YEAR)
+  mutate(Issue_DateTime = datetime(Issue_DateTime, 
+                                   'unixepoch', 'localtime')) %>%
+  mutate(weekday = strftime('%w', Issue_DateTime),
+    year = strftime('%Y', Issue_DateTime),
+    month = strftime('%m', Issue_DateTime),
+    day = strftime('%d', Issue_DateTime),
+    hour = strftime('%H', Issue_DateTime)) %>%
+  filter(year == "2015") %>%
+  group_by(month) %>%
+  summarize("n" = n()) %>%
+  collect()
+  
+  ggplot() + # HOW DO I MAKE N APPEAR ON THE Y AXIS
+    geom_bar(mapping = aes(x = month)) +
+    ylim(150000, 200000) +
+    labs(title = "Frequency of Parking Tickets Given per Month in LA",
+       x = "Month",
+       y = "Frequency")
+  
+
+
+```
 
 It looks like between 1am and 6am is the most popular time for parking tickets to be given. Afternoon and evening hours are rather infrequent times for ticketing activities on the whole.  
 
 ```{r}
-ggplot(data = dates_vect) + 
-  geom_bar(mapping = aes(x = )) +
-  labs(title = "Frequency of Parking Tickets Given per Hour in LA",
-       x = "Hour",
+la_tix %>% ### HOUR
+  mutate(Issue_DateTime = datetime(Issue_DateTime, 
+                                   'unixepoch', 'localtime')) %>%
+  mutate(weekday = strftime('%w', Issue_DateTime),
+    year = strftime('%Y', Issue_DateTime),
+    month = strftime('%m', Issue_DateTime),
+    day = strftime('%d', Issue_DateTime),
+    hour = strftime('%H', Issue_DateTime)) %>%
+  select(hour) %>%
+  group_by(hour) %>%
+  summarize("n" = n()) %>%
+  collect() 
+
+  ggplot() + # HOW DO I MAKE N APPEAR ON THE Y AXIS
+    geom_bar(mapping = aes(x = hour)) +
+    ylim(150000, 200000) +
+    labs(title = "Frequency of Parking Tickets Given per Month in LA",
+       x = "Month",
+       y = "Frequency")
+```
+
+Tuesdays appear the common day to get ticketed, Saturdays being the least common. Weekends have markedly less tickets given; compared to the other weekdays, Mondays and Fridays appear to have less tickets given than mid-week days.  
+
+```{r}
+la_tix %>% ### WEEKDAY
+  mutate(Issue_DateTime = datetime(Issue_DateTime, 
+                                   'unixepoch', 'localtime')) %>%
+  mutate(weekday = strftime('%w', Issue_DateTime),
+    year = strftime('%Y', Issue_DateTime),
+    month = strftime('%m', Issue_DateTime),
+    day = strftime('%d', Issue_DateTime),
+    hour = strftime('%H', Issue_DateTime)) %>%
+  select(weekday) %>%
+  group_by(weekday) %>%
+  summarize("n" = n()) %>%
+  collect() 
+
+  ggplot() + # HOW DO I MAKE N APPEAR ON THE Y AXIS
+    geom_bar(mapping = aes(x = weekday)) +
+    ylim(150000, 200000) +
+    labs(title = "Frequency of Parking Tickets Given per Month in LA",
+       x = "Month",
        y = "Frequency")
 ```
 
 ```{r}
-dates_vect %>% 
-  count(year, month, day) %>%
-  arrange(year, month, day) %>%
-  ggplot(mapping = aes(x = month, y = year)) +
-  geom_freqpoly() +
-  labs(title = "Proportion of Cut within Color",
-       x = "Color",
-       y = "Cut")
-
-ggplot(data = dates_vect) + 
-  geom_bar(mapping = aes(x = month)) +
-  labs(title = "Frequency of Parking Tickets Given per Month in LA",
-       x = "Hour",
+la_tix %>% ### DAY OF THE MONTH - MAKE SURE TO LIMIT JAN 1 2015 - SEP 30 2016
+  mutate(Issue_DateTime = datetime(Issue_DateTime, 
+                                   'unixepoch', 'localtime')) %>%
+  mutate(weekday = strftime('%w', Issue_DateTime),
+    year = strftime('%Y', Issue_DateTime),
+    month = strftime('%m', Issue_DateTime),
+    day = strftime('%d', Issue_DateTime),
+    hour = strftime('%H', Issue_DateTime)) %>%
+  select(day) %>%
+  group_by(day) %>%
+  summarize("n" = n()) %>%
+  collect() %>%
+  ggplot() + # HOW DO I MAKE N APPEAR ON THE Y AXIS
+    geom_bar(mapping = aes(x = month)) +
+    ylim(150000, 200000) +
+    labs(title = "Frequency of Parking Tickets Given per Month in LA",
+       x = "Month",
        y = "Frequency")
 ```
 
+### 3. Which car makes received most citations?  
 
+Toyota, Honda, and Ford were the top 3 most cited makes. However, there are duplicate entries within the column "Make" - for example, TOYO and TOYT both represent Toyota, etc. These need to be combined with fuzzy string matching.  
 
+```{r}
+la_tix %>%
+  select(Make) %>%
+  group_by(Make) %>%
+  summarize("n" = n()) %>%
+  arrange(desc(n)) %>%
+  collect()
+```
 
+### 4. How many different colors of cars were ticketed? Which color attracted most tickets?
 
+There appears to be 66 different colors of car reported; however, some appear to be duplicates, or not colors at all, at least not common ones. Black attracted the most tickets (862283), followed by white, grey, and silver.  
 
+```{r}
+la_tix %>%
+  select(Color) %>%
+  group_by(Color) %>%
+  summarize("n" = n()) %>%
+  arrange(desc(n)) %>%
+  collect()
+```
 
+### 5. What are the most common ticket types?
 
+The most common violations are "No Parking/Street Cleaning" (1149021), "Meter Expiration", "Preferential Parking", and "Parking in the Red Zone". There are several duplicate categories throughout the 500, as well as codes preserved with no descriptions.  
 
+```{r}
+la_tix %>%
+  select(Violation_Description) %>%
+  group_by(Violation_Description) %>%
+  summarize("n" = n()) %>%
+  arrange(desc(n)) %>%
+  collect()
+```
 
+### 6. How much money was collected on parking tickets in 2015 and 2016?
 
+The total revenue made from citation records that are not NA is **$274,235,070**.
 
+```{r}
+la_tix %>%
+  mutate(Issue_DateTime = datetime(Issue_DateTime, 
+                                   'unixepoch', 'localtime')) %>%
+  mutate(year = strftime('%Y', Issue_DateTime)) %>%
+  select(year, Fine_amount) %>%
+  filter(year %in% c("2015", "2016")) %>%
+  summarize("sum_tickets" = sum(Fine_amount, na.rm = TRUE)) %>%
+  collect()
+```
 
+### 7. Visualize any other information you are interested in.
+
+Do out of state offenders tend to pay more in fines on average than in state residents? Is there a difference in the offenses between the two groups (restricted to the top 5 most common)?   
+
+Vehicles with non-California plates tend to pay about $3 more on average - this is not too much of a difference. 
+
+```{r}
+la_tix %>%
+  select(RP_State_Plate, Violation_Description, Fine_amount) %>%
+  mutate(CA_plate = ifelse(RP_State_Plate %in% c("CA"), "CA", "Not_CA")) %>%
+  group_by(CA_plate) %>%
+  summarize("mean_fine" = mean(Fine_amount, na.rm = TRUE)) %>%
+  arrange(desc(mean_fine)) %>%
+  collect()
+```
+
+```{r}
+la_tix %>%
+  select(RP_State_Plate, Violation_Description, Fine_amount) %>%
+  filter(Violation_Description %in% c("NO PARK/STREET CLEAN",
+                                      "METER EXP.",
+                                      "PREFERENTIAL PARKING",
+                                      "RED ZONE",
+                                      "DISPLAY OF TABS")) %>%
+  mutate(CA_plate = ifelse(RP_State_Plate %in% c("CA"), "CA", "Not_CA")) %>%
+  count(Violation_Description, CA_plate) %>%
+  group_by(Violation_Desciption) %>%
+  #mutate(prop = n / sum(n)) %>%
+  collect() 
+
+%>%
+  ggplot(mapping = aes(x = Violation_Description, y = CA_plate)) +
+    geom_tile(mapping = aes(fill = prop))
+  
+
+  
+
+  summarize("mean_fine" = mean(Fine_amount, na.rm = TRUE)) %>%
+  arrange(desc(mean_fine)) %>%
+  collect()
+```
+
+```{r}
+la_tix
+```
 
 
