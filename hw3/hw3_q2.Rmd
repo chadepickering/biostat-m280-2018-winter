@@ -9,7 +9,7 @@ output: html_document
 
 First, connect to the database, which only contains one table, called `latix`.
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 library(DBI)
 library(RSQLite)
 library(tidyverse)
@@ -24,13 +24,15 @@ la_tix <- dplyr::tbl(park, "latix")
 
 ### 1. How many tickets are in this data set? Which time period do these tickets span? Which years have most data?
 
+There are **4044338 distinct ticket numbers** in the dataset (and **4044488** rows, perhaps 150 tickets did not have reported numbers).  
+
 ```{r}
 la_tix %>%
   summarize("Num Tickets" = n_distinct(Ticket_number)) %>%
   collect()
 ```
 
-There are **4044338 distinct ticket numbers** in the dataset (and **4044488** rows, perhaps 150 tickets did not have reported numbers).  
+The earliest recorded ticket in the dataset was given on **April 27, 2010**. The latest recorded ticket in the dataset was given on **December 29, 2017**.  
 
 ```{r, warning=FALSE, message=FALSE}
 la_tix %>%
@@ -42,7 +44,7 @@ la_tix %>%
   collect()
 ```
 
-The earliest recorded ticket in the dataset was given on **April 27, 2010**. The latest recorded ticket in the dataset was given on **December 29, 2017**.  
+The most tickets in the dataset were given in **2015**, closely followed by **2016**.  
 
 ```{r, warning=FALSE, message=FALSE}
 la_tix %>%
@@ -54,7 +56,6 @@ la_tix %>%
   collect()
 ```
 
-The most tickets in the dataset were given in **2015**, closely followed by **2016**.  
 
 ### 2. When (which hour, weekday, month day, and month) are you most likely to get a ticket and when are you least likely to get a ticket?
 
