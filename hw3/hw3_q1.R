@@ -93,7 +93,13 @@ ui <- fluidPage(
                   value = 5),
       
       selectInput(inputId = "num_4", label = "Method", choices = c("Mean", "Median"),
-                  selected = "Median")
+                  selected = "Median"),
+      
+      sliderInput("num_5",
+                  "How many job titles?",
+                  min = 1,
+                  max = 50,
+                  value = 10)
     
     ),
     
@@ -102,7 +108,8 @@ ui <- fluidPage(
       plotOutput("static_payroll"),
       plotOutput("employee_earn"),
       plotOutput("dept_earn"),
-      plotOutput("dept_cost")
+      plotOutput("dept_cost"),
+      plotOutput("total_vs_proj")
     )
   )
 )
@@ -149,7 +156,8 @@ server <- function(input, output) {
     app_3_tbl <- cbind(id_val, pay_val, earnings_vals)
     app_3_tbl <- as_tibble(app_3_tbl)
 
-    ggplot(app_3_tbl, aes(x = id_val, y = as.numeric(earnings_vals), 
+    ggplot(app_3_tbl, aes(x = reorder(id_val, as.numeric(earnings_vals)), 
+                          y = as.numeric(earnings_vals), 
                              fill = factor(pay_val, 
                                            levels = c("Other", 
                                                       "Overtime", 
@@ -193,7 +201,8 @@ server <- function(input, output) {
       app_4_tbl <- cbind(id_val, pay_val, methods_vals)
       app_4_tbl <- as_tibble(app_4_tbl)
       
-      ggplot(app_4_tbl, aes(x = id_val, y = as.numeric(methods_vals), 
+      ggplot(app_4_tbl, aes(x = reorder(id_val, as.numeric(methods_vals)), 
+                            y = as.numeric(methods_vals), 
                             fill = factor(pay_val, 
                                           levels = c("Other", 
                                                      "Overtime", 
@@ -224,16 +233,18 @@ server <- function(input, output) {
                    rep("Overtime", input$num_3), 
                    rep("Other", input$num_3))
       id_val <- rep(top_depts$dept, 3)
-      app_4_tbl <- cbind(id_val, pay_val, tot_vals)
-      app_4_tbl <- as_tibble(app_4_tbl)
+      app_5_tbl <- cbind(id_val, pay_val, tot_vals)
+      app_5_tbl <- as_tibble(app_5_tbl)
       
-      ggplot(app_4_tbl, aes(x = id_val, y = as.numeric(tot_vals), 
+      ggplot(app_5_tbl, aes(x = reorder(id_val, as.numeric(tot_vals)), 
+                            y = as.numeric(tot_vals), 
                             fill = factor(pay_val, 
                                           levels = c("Other", 
                                                      "Overtime", 
                                                      "Base")))) + 
         geom_bar(stat = "identity") + coord_flip() +
-        labs(title = paste("Top", input$num_3, "Most Costly Departments in LA in", 
+        labs(title = paste("Top", input$num_3, 
+                           "Most Costly Departments in LA in", 
                            input$num_2, "by Type"),
              x = "Department",
              y = c("Total Earnings per Category"), 
@@ -242,7 +253,32 @@ server <- function(input, output) {
       
     })
     
+    # 6. What is the mean difference between total_pay and proj_annual_salary
+    # by job_title per year? Give top n.
+    output$total_vs_proj <- renderPlot({
+      total_proj <- process %>%
+        filter(year == input$num_2) %>% 
+        mutate(diff_obs_proj = total_pay - proj_annual_salary) %>%
+        group_by(job_title) %>%
+        summarize(mean_diff = mean(diff_obs_proj)) %>%
+        arrange(desc(mean_diff)) %>%
+        head(input$num_5)
     
+      app_6_tbl <- as_tibble(total_proj)
+      
+      ggplot(app_6_tbl, aes(x = reorder(job_title, as.numeric(mean_diff)), 
+                            y = as.numeric(mean_diff))) + 
+        geom_bar(stat = "identity") + coord_flip() +
+        labs(title = paste("Top", input$num_5, 
+                           "Most Underestimated Jobs in LA in", 
+                           input$num_2),
+             subtitle = "Mean Difference in Projected 
+                          Annual Salary and Total Pay",
+             x = "Job Title",
+             y = "Mean Difference (Proj. Annual Salary - Obs. Pay)") 
+      
+      
+    })
     
   
 }
