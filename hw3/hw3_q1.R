@@ -165,17 +165,22 @@ server <- function(input, output) {
     
     # 4. 
     output$dept_earn <- renderPlot({
-      top_depts <- dept_earnings %>%
-        filter(year == input$num_2) %>% 
-        arrange(desc(total)) %>%
-        head(input$num_3) %>% 
-        select(c(`dept`, `total`, starts_with(tolower(input$num_4))))
       
       if(input$num_4 == "Median"){
+        top_depts <- dept_earnings %>%
+          filter(year == input$num_2) %>% 
+          arrange(desc(median_total)) %>%
+          head(input$num_3) %>% 
+          select(c(`dept`, `total`, starts_with(tolower(input$num_4))))
         methods_vals <- c(top_depts$median_base, 
-                         top_depts$median_overtime, 
-                         top_depts$median_other)
+                          top_depts$median_overtime, 
+                          top_depts$median_other)
       } else {
+        top_depts <- dept_earnings %>%
+          filter(year == input$num_2) %>% 
+          arrange(desc(mean_total)) %>%
+          head(input$num_3) %>% 
+          select(c(`dept`, `total`, starts_with(tolower(input$num_4))))
         methods_vals <- c(top_depts$mean_base, 
                           top_depts$mean_overtime, 
                           top_depts$mean_other)
