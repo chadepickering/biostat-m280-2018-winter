@@ -32,8 +32,7 @@ library(rsconnect)
 # saveRDS(process, "process.rds")
 
 process <- 
-  readRDS('/home/chad.e.pickering/R/biostat-m280-2018-winter/hw3/process.rds', 
-        refhook = NULL)
+  readRDS('/home/chad.e.pickering/R/biostat-m280-2018-winter/hw3/process.rds')
 
 # Tibbles independent of user input:
 
