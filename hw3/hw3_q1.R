@@ -4,28 +4,36 @@
 library(tidyverse)
 library(dplyr)
 library(shiny)
-payroll <- read_csv("/home/m280-data/la_payroll/LA_City_Employee_Payroll.csv", 
-                    col_types = cols(MOU = col_character(), 
-                                     "Record Number" = col_character()))
+library(rsconnect)
+# payroll <- read_csv("/home/m280-data/la_payroll/LA_City_Employee_Payroll.csv", 
+#                     col_types = cols(MOU = col_character(), 
+#                                      "Record Number" = col_character()))
+# 
+# # 1. Tidy data.
+# process <- payroll %>% 
+#   mutate( # strip dollar signs, rename cols
+#       year = as.numeric(Year),
+#       rec_id = `Record Number`,
+#       base_pay = as.numeric(str_sub(`Base Pay`, 2, -1)),
+#       overtime_pay = as.numeric(str_sub(`Overtime Pay`, 2, -1)),
+#       # all bonus, lump sum, and other adjustments = other pay (payroll exp.)
+#       other_pay = as.numeric(str_sub(`Other Pay (Payroll Explorer)`, 2, -1)),
+#       total_pay = base_pay + overtime_pay + other_pay,
+#       hourly_pay = as.numeric(str_sub(`Hourly or Event Rate`, 2, -1)),
+#       proj_annual_salary = as.numeric(str_sub(`Projected Annual Salary`, 2, -1))
+#     ) %>%
+#   select(
+#         year, rec_id, base_pay, overtime_pay, other_pay, total_pay,
+#         hourly_pay, proj_annual_salary, dept = `Department Title`, 
+#         job_title = `Job Class Title`
+#       )
 
-# 1. Tidy data.
-process <- payroll %>% 
-  mutate( # strip dollar signs, rename cols
-      year = as.numeric(Year),
-      rec_id = `Record Number`,
-      base_pay = as.numeric(str_sub(`Base Pay`, 2, -1)),
-      overtime_pay = as.numeric(str_sub(`Overtime Pay`, 2, -1)),
-      # all bonus, lump sum, and other adjustments = other pay (payroll exp.)
-      other_pay = as.numeric(str_sub(`Other Pay (Payroll Explorer)`, 2, -1)),
-      total_pay = base_pay + overtime_pay + other_pay,
-      hourly_pay = as.numeric(str_sub(`Hourly or Event Rate`, 2, -1)),
-      proj_annual_salary = as.numeric(str_sub(`Projected Annual Salary`, 2, -1))
-    ) %>%
-  select(
-        year, rec_id, base_pay, overtime_pay, other_pay, total_pay,
-        hourly_pay, proj_annual_salary, dept = `Department Title`, 
-        job_title = `Job Class Title`
-      )
+# Make RDS file from 'process':
+# saveRDS(process, "process.rds")
+
+process <- 
+  readRDS('/home/chad.e.pickering/R/biostat-m280-2018-winter/hw3/process.rds', 
+        refhook = NULL)
 
 # Tibbles independent of user input:
 
@@ -92,7 +100,8 @@ ui <- fluidPage(
                   max = 50,
                   value = 5),
       
-      selectInput(inputId = "num_4", label = "Method", choices = c("Mean", "Median"),
+      selectInput(inputId = "num_4", label = "Method", 
+                  choices = c("Mean", "Median"),
                   selected = "Median"),
       
       sliderInput("num_5",
@@ -103,7 +112,7 @@ ui <- fluidPage(
     
     ),
     
-    # Show a plot of the generated distribution
+    
     mainPanel(
       plotOutput("static_payroll"),
       plotOutput("employee_earn"),
@@ -130,7 +139,7 @@ server <- function(input, output) {
                                                 "Overtime", 
                                                 "Other"))),
                position = "dodge") +
-      labs(title = "Total LA City Payroll by Year and Type",
+      labs(title = "2. Total LA City Payroll by Year and Type",
            x = "Year",
            y = "Total Pay per Category", 
            fill = "Pay Ctg.")
@@ -163,7 +172,8 @@ server <- function(input, output) {
                                                       "Overtime", 
                                                       "Base")))) + 
       geom_bar(stat = "identity") + coord_flip() +
-      labs(title = paste("Top", input$num_1, "Earners in LA in", input$num_2),
+      labs(title = paste("3. Top", input$num_1, "Earners in LA in", 
+                         input$num_2),
           x = "Employee ID",
           y = "Total Pay per Category", 
           fill = "Pay Ctg.") 
@@ -208,7 +218,8 @@ server <- function(input, output) {
                                                      "Overtime", 
                                                      "Base")))) + 
         geom_bar(stat = "identity") + coord_flip() +
-        labs(title = paste("Top", input$num_3, "Earning Departments in LA in", 
+        labs(title = paste("4. Top", input$num_3, 
+                           "Earning Departments in LA in", 
                            input$num_2, "by", input$num_4, "Payroll"),
              x = "Department",
              y = c("Total", input$num_4, "Earnings per Category"), 
@@ -243,7 +254,7 @@ server <- function(input, output) {
                                                      "Overtime", 
                                                      "Base")))) + 
         geom_bar(stat = "identity") + coord_flip() +
-        labs(title = paste("Top", input$num_3, 
+        labs(title = paste("5. Top", input$num_3, 
                            "Most Costly Departments in LA in", 
                            input$num_2, "by Type"),
              x = "Department",
@@ -269,7 +280,7 @@ server <- function(input, output) {
       ggplot(app_6_tbl, aes(x = reorder(job_title, as.numeric(mean_diff)), 
                             y = as.numeric(mean_diff))) + 
         geom_bar(stat = "identity") + coord_flip() +
-        labs(title = paste("Top", input$num_5, 
+        labs(title = paste("6. Top", input$num_5, 
                            "Most Underestimated Jobs in LA in", 
                            input$num_2),
              subtitle = "Mean Difference in Projected 
