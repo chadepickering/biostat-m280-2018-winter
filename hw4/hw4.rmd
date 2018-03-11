@@ -11,6 +11,7 @@ output: html_document
 library(sparklyr)
 library(dplyr)
 library(ggplot2)
+library(lubridate)
 Sys.setenv(SPARK_HOME="/usr/lib/spark")
 config <- spark_config()
 sc <- spark_connect(master = "yarn-client", config = config)
@@ -19,7 +20,7 @@ airports_tbl <- tbl(sc, 'airports')
 flights_tbl %>% print(width = Inf) %>% head(3) ## head of the data - delete later
 ```
 
-## 1. Map the top 10 busiest airports (in 1995). Size of dots should reflect the number of flights through that destination.
+### 1. Map the top 10 busiest airports (in 1995). Size of dots should reflect the number of flights through that destination.
 
 #### "Busiest" is defined as the sum of flights arriving and departing a particular airport per unit time.  
 
@@ -70,7 +71,7 @@ ggplot() +
        y = "Latitude")
 ```
 
-## 2. Map the top 10 busiest direct routes. Size of lines should reflect the number of flights through that route.  
+### 2. Map the top 10 busiest direct routes. Size of lines should reflect the number of flights through that route.  
 
 In 1995, all of the top 10 busiest direct airline routes had their converses in the top 10 as well, as shown by the map. Destinations close to each other that are more popular pack the top 10. For example, Las Vegas to LAX and vice versa was the busiest pair.  
 
@@ -115,6 +116,37 @@ ggplot() +
        color = "Destination",
        size = "Number of Flights") 
 ```
+
+### 3a. Reproduce the LAX time series plot. Visualize and explain some prominent features you observe. For example, what happened at points 1-5?
+
+```{r}
+flights_tbl %>%
+  filter(year > 1997) %>%
+  filter(origin == "LAX" | dest == "LAX") %>%
+  group_by(year, month, dayofmonth) %>%
+  arrange(year, month, dayofmonth) %>%
+  mutate(date = as.Date(paste(year, month, dayofmonth, sep = "-"), "%Y-%m-%d")) %>%
+  count() %>%
+  collect() %>%
+  ggplot() +
+    geom_line(mapping = aes(x = date, y = n)) +
+    coord_fixed(1.3) + 
+    labs(title = "LAX Air Traffic")
+  
+  
+  
+```
+
+
+
+
+
+
+
+
+
+
+
 
 
 
