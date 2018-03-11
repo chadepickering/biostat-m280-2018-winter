@@ -105,15 +105,15 @@ ggplot() +
   geom_curve(data = top_10_lonlat, 
              aes(x = lon.x, y = lat.x, 
                  xend = lon.y, yend = lat.y, 
-                 col = dest, size = n,
-                 alpha = 0.7)) + 
+                 col = dest, size = n),
+                 alpha = 0.7) + 
   geom_point(data = top_10_lonlat, 
             aes(x = lon.x, y = lat.x), size = 0.5) +   
   labs(title = "Top 10 Busiest Airline Routes in 1995",
        x = "Longitude",
-       y = "Latitude")
-
-
+       y = "Latitude",
+       color = "Destination",
+       size = "Number of Flights") 
 ```
 
 
