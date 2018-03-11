@@ -121,6 +121,8 @@ ggplot() +
 
 ### 3a. Reproduce the LAX time series plot. Visualize and explain some prominent features you observe. For example, what happened at points 1-5?
 
+#### The reproduction:  
+
 ```{r}
 df_3a <- flights_tbl %>%
   filter(year > 1997) %>%
@@ -137,23 +139,85 @@ df_3a %>%
     geom_line(mapping = aes(x = date, y = n)) +
     coord_fixed(1.3) + 
     labs(title = "LAX Air Traffic")
-  
-
-  
 ```
 
+#### Prominent feature #1: 
 
+The 9/11 attacks on September 11, 2001 greatly reduced the number of planes flying in and out of LAX. However, the drop-off is not completely sudden; it takes a few weeks to stabilize again.  
 
+```{r, warning=FALSE, message=FALSE}
+df_3a %>%
+  ggplot() +
+    geom_line(mapping = aes(x = date, y = n)) +
+    coord_fixed(0.6) + 
+    xlim(mdy("1/1/2001"), mdy("12/31/2002")) +
+    labs(title = "LAX Air Traffic",
+         subtitle = "January 2001 - December 2002",
+         x = "Date",
+         y = "Number of Flights Per Day (Incoming + Outgoing)")
+```
 
+#### Prominent features #2 and #3:
 
+Prominent feature #2 is the dip at the end of November, likely Thanksgiving - air traffic decreases because of holiday closures and activities. Prominent feauture #3 is the dip at the beginning of July - Independence Day - much for the same reasons noted above.  
 
+```{r, warning=FALSE, message=FALSE}
+df_3a %>%
+  ggplot() +
+    geom_line(mapping = aes(x = date, y = n)) +
+    coord_fixed(0.3) + 
+    xlim(mdy("1/1/2004"), mdy("12/31/2004")) +
+    labs(title = "LAX Air Traffic",
+         subtitle = "January 2004 - December 2004",
+         x = "Date",
+         y = "Number of Flights Per Day (Incoming + Outgoing)")
+```
 
+#### Prominent feature #4: 
 
+The Great Recession began in 2007, and the subtle drop at the beginning of 2008 may be because airports across the country implemented new policies to reduce the number of aircrafts in operation with the hopes of decreasing cost. A larger dip happens in summer 2008 after a small rebound. 
 
+```{r, warning=FALSE, message=FALSE}
+df_3a %>%
+  ggplot() +
+    geom_line(mapping = aes(x = date, y = n)) +
+    coord_fixed(0.3) + 
+    xlim(mdy("7/1/2007"), mdy("6/30/2008")) +
+    labs(title = "LAX Air Traffic",
+         subtitle = "July 2007 - June 2008",
+         x = "Date",
+         y = "Number of Flights Per Day (Incoming + Outgoing)")
+```
 
+#### Prominent feature #5: 
 
+It seems like there was a policy change that took effect on January 1, 2001 that increased the number of aircraft in operation. This trend remains constant throughout 2001 until the 9/11 attacks.  
 
+```{r, warning=FALSE, message=FALSE}
+df_3a %>%
+  ggplot() +
+    geom_line(mapping = aes(x = date, y = n)) +
+    coord_fixed(0.3) + 
+    xlim(mdy("7/1/2000"), mdy("6/30/2001")) +
+    labs(title = "LAX Air Traffic",
+         subtitle = "July 2000 - June 2001",
+         x = "Date",
+         y = "Number of Flights Per Day (Incoming + Outgoing)")
+```
 
+### 3b. Visualize and explain seasonal effects.  
+
+```{r}
+df_3b <- flights_tbl %>%
+  filter(origin == "LAX" | dest == "LAX") %>%
+  group_by(year, month, dayofmonth) %>%
+  arrange(year, month, dayofmonth) %>%
+  count() %>%
+  collect()
+  
+df_3a$date <- as.Date(paste(df_3a$year, df_3a$month, df_3a$dayofmonth, 
+                           sep = "-"), "%Y-%m-%d")
+```
 
 
 
