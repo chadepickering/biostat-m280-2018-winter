@@ -21,7 +21,9 @@ flights_tbl %>% print(width = Inf) %>% head(3) ## head of the data - delete late
 
 ## 1. Map the top 10 busiest airports (in 1995). Size of dots should reflect the number of flights through that destination.
 
-#### "Busiest" is defined as the sum of flights arriving and departing a particular airport per unit time.
+#### "Busiest" is defined as the sum of flights arriving and departing a particular airport per unit time.  
+
+Chicago/O'Hare, Dallas/Ft. Worth, Atlanta, and LAX were the top 4 busiest U.S. airports in 1995 according to our metric.  
 
 ```{r}
 origin_tbl <- flights_tbl %>%
@@ -57,7 +59,8 @@ top_10_final_tbl$lat <- as.numeric(as.character(top_10_final_tbl$lat))
 
 usa <- map_data("usa")
 ggplot() + 
-  geom_polygon(data = usa, aes(x=long, y = lat, group = group), fill = "aliceblue", color = "grey70") + 
+  geom_polygon(data = usa, aes(x=long, y = lat, group = group), 
+               fill = "aliceblue", color = "grey70") + 
   coord_fixed(1.3) +
   geom_point(data = top_10_final_tbl, 
              mapping = aes(x = lon, y = lat, color = airport, size = total)) +
@@ -66,6 +69,61 @@ ggplot() +
        x = "Longitude",
        y = "Latitude")
 ```
+
+## 2. Map the top 10 busiest direct routes. Size of lines should reflect the number of flights through that route.  
+
+In 1995, all of the top 10 busiest direct airline routes had their converses in the top 10 as well, as shown by the map. Destinations close to each other that are more popular pack the top 10. For example, Las Vegas to LAX and vice versa was the busiest pair.  
+
+```{r}
+routes_tbl <- flights_tbl %>%
+  filter(year == 1995) %>%
+  group_by(origin, dest) %>%
+  count() %>%
+  arrange(desc(n)) %>%
+  collect() %>% 
+  head(10)
+
+top_10_routes <- airports_tbl %>% 
+  filter(faa %in% routes_tbl$origin | faa %in% routes_tbl$dest) %>%
+  select(faa, lon, lat)
+
+top_10_half_lonlat <- merge(routes_tbl, top_10_routes, 
+                            by.x="origin", by.y="faa")
+
+top_10_lonlat <- merge(top_10_half_lonlat, top_10_routes, 
+                       by.x="dest", by.y="faa") 
+
+top_10_lonlat$lon.x <- as.numeric(as.character(top_10_lonlat$lon.x))
+top_10_lonlat$lat.x <- as.numeric(as.character(top_10_lonlat$lat.x))
+top_10_lonlat$lon.y <- as.numeric(as.character(top_10_lonlat$lon.y))
+top_10_lonlat$lat.y <- as.numeric(as.character(top_10_lonlat$lat.y))
+
+ggplot() + 
+  geom_polygon(data = usa, aes(x = long, y = lat, group = group), 
+               fill = "aliceblue", color = "grey70") + 
+  coord_fixed(1.3) +
+  geom_curve(data = top_10_lonlat, 
+             aes(x = lon.x, y = lat.x, 
+                 xend = lon.y, yend = lat.y, 
+                 col = dest, size = n,
+                 alpha = 0.7)) + 
+  geom_point(data = top_10_lonlat, 
+            aes(x = lon.x, y = lat.x), size = 0.5) +   
+  labs(title = "Top 10 Busiest Airline Routes in 1995",
+       x = "Longitude",
+       y = "Latitude")
+
+
+```
+
+
+
+
+
+
+
+
+
 
 
 
