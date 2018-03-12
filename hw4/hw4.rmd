@@ -8,10 +8,15 @@ output: html_document
 #### The following code connects to spark, the data, etc.
 
 ```{r, warning=FALSE, message=FALSE}
+if (!"gridExtra" %in% rownames(installed.packages())){
+  install.packages("gridExtra", repos="http://cran.rstudio.com/")
+}
+
 library(sparklyr)
 library(dplyr)
 library(ggplot2)
 library(lubridate)
+library(gridExtra)
 Sys.setenv(SPARK_HOME="/usr/lib/spark")
 config <- spark_config()
 sc <- spark_connect(master = "yarn-client", config = config)
@@ -263,7 +268,7 @@ centered_daily_traffic %>%
          y = "Centered Mean (Daily)")
 ```
 
-Going further, we can average over each unique day of a year in the range 1987-2008 to see the average trend and quantify the typical deviance in number of aircrafts during any season relative to average.  
+Going further, we can average over each unique day of a year in the range 1987-2008 to see the average trend and quantify the typical deviance in number of operating aircrafts during any season relative to average. There are more flights per day on average from Post-Memorial Day through Labor Day as compared to the rest of the year. This makes summer the peak of the annual seasonality behavior, and winter months (including December) the trough. National holidays are local minima.  
 
 ```{r, warning=FALSE, message=FALSE}
 average_annual_dev <- centered_daily_traffic %>%
@@ -272,27 +277,71 @@ average_annual_dev <- centered_daily_traffic %>%
   arrange(month, dayofmonth) %>%
   collect()
 
-average_annual_dev$date <-  as.Date(paste(average_annual_dev$month, 
+# Need to remove 2018
+average_annual_dev$date <- as.Date(paste(average_annual_dev$month, 
                                           average_annual_dev$dayofmonth, 
-                           sep = "-"), "%Y-%m-%d")
+                           sep = "-"), "%m-%d")
 
 average_annual_dev %>%
   ggplot() +
     geom_line(mapping = aes(x = date, y = daily_mean)) +
     ylim(-130, 60) +
     coord_fixed(0.7) + 
-    labs(title = "Average LAX Air Traffic per Day Centered by Annual Mean",
+    labs(title = "Average LAX Air Traffic per Day Relative to Annual Mean",
          subtitle = "All Years 1987-2008",
          x = "Date",
          y = "Centered Mean (Daily)")
 ```
 
+### 3c. Visualize and explain weekly effects.  
 
+First, let's zoom into two segments of the plot from 3a. Both plots show the overarching weekly trend, a relatively constant number of aircrafts over the weekdays with a substantial drop on Saturday and a partial recovery on Sunday. Both plots cover September and October, the top from 2000 (pre-9/11) and the bottom from 2007 (post-9/11). We can see that Tuesday in the 2007 plot feature less flights on average than the other weekdays; this is a difference in trend from the pre-9/11 plot.  
 
+```{r, warning=FALSE, message=FALSE}
+weekly_pre <- df_3a %>%
+  ggplot() +
+    geom_line(mapping = aes(x = date, y = n)) +
+    coord_fixed(0.05) + 
+    xlim(mdy("9/1/2000"), mdy("10/31/2000")) +
+    ylim(1000, 1300) +
+    labs(title = "LAX Air Traffic",
+         subtitle = "September 2000 - October 2000 (Pre-9/11)",
+         x = "Date",
+         y = "Number of Flights")
+  
+weekly_post <- df_3a %>%
+  ggplot() +
+    geom_line(mapping = aes(x = date, y = n)) +
+    coord_fixed(0.05) + 
+    xlim(mdy("9/1/2007"), mdy("10/31/2007")) +
+    ylim(1100, 1400) +
+    labs(title = "LAX Air Traffic",
+         subtitle = "September 2007 - October 2007 (Post 9/11)",
+         x = "Date",
+         y = "Number of Flights")
 
+grid.arrange(weekly_pre, weekly_post, nrow=2)
+```
 
+Below is a plot quantifying the average number of aircrafts per day of the week, showing the trend discussed above.  
 
+```{r}
+all_days <- flights_tbl %>%
+  filter(origin == "LAX" | dest == "LAX") %>%
+  group_by(year, month, dayofmonth) %>%
+  count() %>%
+  collect()
 
+all_days$date <- as.Date(paste(all_days$year, all_days$month, 
+                          all_days$dayofmonth, sep = "-"), "%Y-%m-%d")
+
+all_days %>%
+  arrange(year, month, dayofmonth) %>% 
+  mutate(day_of_week = wday(date)) %>%
+  group_by(year, day_of_week) %>%
+  summarize(sum_week = sum(n)) %>%
+  collect()
+```
 
 
 
