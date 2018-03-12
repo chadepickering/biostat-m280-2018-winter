@@ -207,17 +207,92 @@ df_3a %>%
 
 ### 3b. Visualize and explain seasonal effects.  
 
-```{r}
-df_3b <- flights_tbl %>%
+First, eliminate the yearly effect. I generate a mean count per year, and center each day's count to the corresponding year's mean.  
+
+```{r, warning=FALSE, message=FALSE}
+centered_daily_traffic <- flights_tbl %>%
   filter(origin == "LAX" | dest == "LAX") %>%
   group_by(year, month, dayofmonth) %>%
-  arrange(year, month, dayofmonth) %>%
   count() %>%
+  group_by(year) %>%
+  mutate(yearly_mean = mean(n)) %>%
+  arrange(year, month, dayofmonth) %>%
+  mutate(centered_mean = n-yearly_mean) %>%
   collect()
-  
-df_3a$date <- as.Date(paste(df_3a$year, df_3a$month, df_3a$dayofmonth, 
+
+centered_daily_traffic$date <- as.Date(paste(centered_daily_traffic$year, 
+                                             centered_daily_traffic$month, 
+                                             centered_daily_traffic$dayofmonth, 
                            sep = "-"), "%Y-%m-%d")
+
+centered_daily_traffic %>%
+  ggplot() +
+    geom_line(mapping = aes(x = date, y = centered_mean)) +
+    coord_fixed(3.5) + 
+    labs(title = "LAX Air Traffic Centered by Annual Mean",
+         subtitle = "1987 - 2008",
+         x = "Date",
+         y = "Centered Mean (Daily)")
 ```
+
+Zooming in on a few years at a time for clarity, a defined seasonal component becomes apparent: traffic increases during the summer months and decreases during the winter months in general. Below, 1988-1993 and 2002-2007 are highlighted. You can actually see more day-to-day variance in number of aircrafts in operation in the 90s than in the 00s.  
+
+```{r, warning=FALSE, message=FALSE}
+centered_daily_traffic %>%
+  ggplot() +
+    geom_line(mapping = aes(x = date, y = centered_mean)) +
+    xlim(mdy("1/1/1988"), mdy("12/31/1993")) +
+    ylim(-200, 100) +
+    coord_fixed(3.3) + 
+    labs(title = "LAX Air Traffic Centered by Annual Mean",
+         subtitle = "1988 - 1993",
+         x = "Date",
+         y = "Centered Mean (Daily)")
+```
+
+```{r, warning=FALSE, message=FALSE}
+centered_daily_traffic %>%
+  ggplot() +
+    geom_line(mapping = aes(x = date, y = centered_mean)) +
+    xlim(mdy("1/1/2002"), mdy("12/31/2007")) +
+    ylim(-300, 100) +
+    coord_fixed(3.3) + 
+    labs(title = "LAX Air Traffic Centered by Annual Mean",
+         subtitle = "2002 - 2007",
+         x = "Date",
+         y = "Centered Mean (Daily)")
+```
+
+Going further, we can average over each unique day of a year in the range 1987-2008 to see the average trend and quantify the typical deviance in number of aircrafts during any season relative to average.  
+
+```{r, warning=FALSE, message=FALSE}
+average_annual_dev <- centered_daily_traffic %>%
+  group_by(month, dayofmonth) %>%
+  summarize(daily_mean = mean(centered_mean)) %>%
+  arrange(month, dayofmonth) %>%
+  collect()
+
+average_annual_dev$date <-  as.Date(paste(average_annual_dev$month, 
+                                          average_annual_dev$dayofmonth, 
+                           sep = "-"), "%Y-%m-%d")
+
+average_annual_dev %>%
+  ggplot() +
+    geom_line(mapping = aes(x = date, y = daily_mean)) +
+    ylim(-130, 60) +
+    coord_fixed(0.7) + 
+    labs(title = "Average LAX Air Traffic per Day Centered by Annual Mean",
+         subtitle = "All Years 1987-2008",
+         x = "Date",
+         y = "Centered Mean (Daily)")
+```
+
+
+
+
+
+
+
 
 
 
