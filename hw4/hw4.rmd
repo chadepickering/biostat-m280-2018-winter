@@ -27,6 +27,7 @@ config <- spark_config()
 sc <- spark_connect(master = "yarn-client", config = config)
 flights_tbl <- tbl(sc, 'flights')
 airports_tbl <- tbl(sc, 'airports')
+airlines_tbl <- tbl(sc, 'airlines')
 flights_tbl %>% print(width = Inf) %>% head(3) ## head of the data - delete later
 ```
 
@@ -397,11 +398,78 @@ ggplot() +
 
 ### 4. Build a predictive model for the arrival delay (`arrdelay`) of flights flying from LAX. You are allowed to use a maximum of 5 predictors.  
 
+I am subsetting the dataset to include only flights in 2003 and after - predictions will be more indicative of current conditions. 
 
+```{r}
+model_data <- flights_tbl %>%
+  filter(origin == "LAX") %>%  
+  filter(!is.na(arrdelay) & !is.na(arrtime) & !is.na(deptime) & 
+           !is.na(depdelay) & !is.na(actualelapsedtime) & !is.na(distance)) %>%
+  filter(year >= 2003) %>%
+  left_join(airlines_tbl, by = c("uniquecarrier" = "code")) %>%
+  select(arrdelay, month, dayofweek, uniquecarrier, description, dest, 
+         arrtime, deptime, depdelay, actualelapsedtime, distance)
+```
+
+Let's see what seem like good predictors.
+
+```{r, warning=FALSE, message=FALSE}
+# Group by unique carrier:
+model_data %>%
+  group_by(uniquecarrier) %>%
+  summarize(description = min(description), 
+            mean_arrdelay = mean(arrdelay), 
+            mean_depdelay = mean(depdelay), 
+            mean_elaptime = mean(actualelapsedtime), 
+            mean_dist = mean(distance)) %>%
+  select(description, mean_arrdelay, 
+         mean_depdelay, mean_elaptime, mean_dist) %>%
+  arrange(desc(mean_arrdelay)) 
+```
+
+```{r, warning=FALSE, message=FALSE}
+# Group by destination:
+model_data %>%
+  group_by(dest) %>%
+  summarize(description = min(description), 
+            mean_arrdelay = mean(arrdelay), 
+            mean_depdelay = mean(depdelay), 
+            mean_elaptime = mean(actualelapsedtime), 
+            mean_dist = mean(distance)) %>%
+  select(dest, mean_arrdelay, 
+         mean_depdelay, mean_elaptime, mean_dist) %>%
+  arrange(desc(mean_arrdelay))
+```
+
+Choose predictors based on variable selection procedure: TBD
+
+Predictors for now: dest, depdelay, dayofweek, actualelapsedtime, distance
+
+```{r}
+# Partition the data into training and validation sets
+model_partition <- model_data %>% 
+  sdf_partition(train = 0.8, valid = 0.2, seed = 5555)
+
+# Fit a linear model
+ml1 <- model_partition$train %>%
+  ml_linear_regression(arrdelay ~ dest + depdelay + 
+                          actualelapsedtime + distance)
+
+summary(ml1)
+```
 
 ### 5. Visualize and explain any other information you want to explore.
 
-### Question: 
+### Question: Were planes departing later on average after 9/11 as compared to before? Is there a difference between JFK (near the attack) and LAX (not near the attack)?
+
+```{r}
+
+```
+
+
+
+
+
 
 
 
