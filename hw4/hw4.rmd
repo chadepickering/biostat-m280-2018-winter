@@ -460,16 +460,74 @@ summary(ml1)
 
 ### 5. Visualize and explain any other information you want to explore.
 
-### Question: Were planes departing later on average after 9/11 as compared to before? Is there a difference between JFK (near the attack) and LAX (not near the attack)?
+### Question: Did flights have increased departing delays on average after 9/11 as compared to before? Is there a difference between JFK (near the attack) and LAX (not near the attack)?
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
+mean_depdelay_df <- flights_tbl %>%
+  select(year, month, dayofmonth, origin, depdelay) %>%
+  filter(origin == "JFK" | origin == "LAX") %>%
+  filter(year >= 1998 & year <= 2005) %>%
+  group_by(origin, year, month, dayofmonth) %>%
+  summarize(mean_depdelay = mean(depdelay)) %>%
+  arrange(year, month, dayofmonth, origin) %>%
+  collect()
+  
+mean_depdelay_df$date <- as.Date(paste(mean_depdelay_df$year, 
+                                       mean_depdelay_df$month, 
+                                       mean_depdelay_df$dayofmonth, 
+                           sep = "-"), "%Y-%m-%d")
 
+mean_depdelay_df %>%
+  ggplot() +
+  geom_line(aes(x = date, y = mean_depdelay,
+             group = origin, col = origin)) +
+  xlim(mdy("1/1/1998"), mdy("9/10/2001")) +
+  ylim(-10, 85) +
+  coord_fixed(6.0) + 
+  labs(title = "Average Departure Delay Pre-9/11 Attack",
+       subtitle = "JFK vs. LAX",
+       x = "Date",
+       y = "Mean Dep. Delay")
 ```
 
+```{r, warning=FALSE, message=FALSE}
+mean_depdelay_df %>%
+  ggplot() +
+  geom_line(aes(x = date, y = mean_depdelay,
+             group = origin, col = origin)) +
+  xlim(mdy("9/11/2001"), mdy("12/31/2005")) +
+  ylim(-10, 110) +
+  coord_fixed(6.0) + 
+  labs(title = "Average Departure Delay Post-9/11 Attack",
+       subtitle = "JFK vs. LAX",
+       x = "Date",
+       y = "Mean Dep. Delay")
+```
 
+```{r}
+mean_depdelay_df %>%
+  filter(origin == "LAX") %>%
+  ggplot() +
+  geom_line(aes(x = date, y = mean_depdelay)) +
+  ylim(-10, 70) +
+  coord_fixed(9.0) + 
+  labs(title = "Average Departure Delay at LAX",
+       subtitle = "1998-2005",
+       x = "Date",
+       y = "Mean Dep. Delay")
+```
 
-
-
-
+```{r}
+flights_tbl %>%
+  select(year, origin, depdelay) %>%
+  filter(origin == "JFK" | origin == "LAX") %>%
+  filter(year >= 1998 & year <= 2005) %>%
+  group_by(origin, year) %>%
+  summarize(mean_depdelay = mean(depdelay)) %>%
+  arrange(origin, year) %>%
+  collect()
+  
+  
+```
 
 
