@@ -12,11 +12,16 @@ if (!"gridExtra" %in% rownames(installed.packages())){
   install.packages("gridExtra", repos="http://cran.rstudio.com/")
 }
 
+if (!"viridis" %in% rownames(installed.packages())){
+  install.packages("viridis", repos="http://cran.rstudio.com/")
+}
+
 library(sparklyr)
 library(dplyr)
 library(ggplot2)
 library(lubridate)
 library(gridExtra)
+library(viridis)
 Sys.setenv(SPARK_HOME="/usr/lib/spark")
 config <- spark_config()
 sc <- spark_connect(master = "yarn-client", config = config)
@@ -287,6 +292,7 @@ average_annual_dev %>%
     geom_line(mapping = aes(x = date, y = daily_mean)) +
     ylim(-130, 60) +
     coord_fixed(0.7) + 
+    geom_hline(yintercept=0, col = "firebrick", linetype = "dashed") +
     labs(title = "Average LAX Air Traffic per Day Relative to Annual Mean",
          subtitle = "All Years 1987-2008",
          x = "Date",
@@ -295,7 +301,7 @@ average_annual_dev %>%
 
 ### 3c. Visualize and explain weekly effects.  
 
-First, let's zoom into two segments of the plot from 3a. Both plots show the overarching weekly trend, a relatively constant number of aircrafts over the weekdays with a substantial drop on Saturday and a partial recovery on Sunday. Both plots cover September and October, the top from 2000 (pre-9/11) and the bottom from 2007 (post-9/11). We can see that Tuesday in the 2007 plot feature less flights on average than the other weekdays; this is a difference in trend from the pre-9/11 plot.  
+First, let's zoom into two segments of the plot from 3a. Both plots show the overarching weekly trend, a relatively constant number of aircrafts over the weekdays with a substantial drop on Saturday and a partial recovery on Sunday. Both plots shown cover September and October, the top from 2000 (pre-9/11) and the bottom from 2007 (post-9/11). We can see that Tuesdays in the 2007 plot feature less flights on average than the other weekdays; this is a difference in trend from the pre-9/11 plot.  
 
 ```{r, warning=FALSE, message=FALSE}
 weekly_pre <- df_3a %>%
@@ -316,31 +322,42 @@ weekly_post <- df_3a %>%
     xlim(mdy("9/1/2007"), mdy("10/31/2007")) +
     ylim(1100, 1400) +
     labs(title = "LAX Air Traffic",
-         subtitle = "September 2007 - October 2007 (Post 9/11)",
+         subtitle = "September 2007 - October 2007 (Post-9/11)",
          x = "Date",
          y = "Number of Flights")
 
 grid.arrange(weekly_pre, weekly_post, nrow=2)
 ```
 
-Below is a plot quantifying the average number of aircrafts per day of the week, showing the trend discussed above.  
+Below is a plot quantifying the proportions of the number of total aircrafts per day of the week that enter and exit LAX grouped by year, showing the trend discussed above (excluding 1987, which does not have complete data for the year). Using proportions also allows us to see another subtle phenomenon - the lighter-colored (higher proportions) diagonal boxes moving up the plot from left to right signify the day of the week on which New Year's Day falls, which matches our plot from 3b, showing a spike in flights on average on January 1.  
 
 ```{r}
 all_days <- flights_tbl %>%
   filter(origin == "LAX" | dest == "LAX") %>%
+  filter(year > 1987) %>%
   group_by(year, month, dayofmonth) %>%
   count() %>%
   collect()
-
-all_days$date <- as.Date(paste(all_days$year, all_days$month, 
-                          all_days$dayofmonth, sep = "-"), "%Y-%m-%d")
-
+  
+all_days$date <- with(all_days, 
+                      as.Date(paste(year, month, dayofmonth, sep = "-")))
+  
 all_days %>%
   arrange(year, month, dayofmonth) %>% 
-  mutate(day_of_week = wday(date)) %>%
-  group_by(year, day_of_week) %>%
-  summarize(sum_week = sum(n)) %>%
-  collect()
+  mutate(dayofweek = wday(date, label=TRUE)) %>%
+  group_by(year, dayofweek) %>%
+  summarize(sum_dayofweek = sum(n)) %>%
+  group_by(year) %>%
+  mutate(prop_year = sum_dayofweek / sum(sum_dayofweek)) %>%
+  ggplot() +
+    geom_tile(aes(x = year, y = dayofweek, fill = prop_year)) +
+    scale_fill_viridis(option="inferno") +
+    labs(title = "Proportion of Flights per Day of Week per Year",
+         subtitle = "1988-2007",
+         x = "Year",
+         y = "Day of Week", 
+         fill = "Proportion")
+
 ```
 
 
