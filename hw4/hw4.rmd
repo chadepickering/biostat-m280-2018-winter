@@ -329,7 +329,7 @@ weekly_post <- df_3a %>%
 grid.arrange(weekly_pre, weekly_post, nrow=2)
 ```
 
-Below is a plot quantifying the proportions of the number of total aircrafts per day of the week that enter and exit LAX grouped by year, showing the trend discussed above (excluding 1987, which does not have complete data for the year). Using proportions also allows us to see another subtle phenomenon - the lighter-colored (higher proportions) diagonal boxes moving up the plot from left to right signify the day of the week on which New Year's Day falls, which matches our plot from 3b, showing a spike in flights on average on January 1.  
+Below is a plot quantifying the proportions of the number of total aircrafts per day of the week that enter and exit LAX grouped by year, showing the trend discussed above (excluding 1987, which does not have complete data for the year). As years progress, we see that Saturdays are decreasing in proportion and Sundays are increasing in proportion relative to the frequencies of flights per year. Using proportions also allows us to see another subtle phenomenon - the lighter-colored (higher proportions) diagonal boxes moving up the plot from left to right signify the day of the week on which New Year's Day falls, which matches our plot from 3b, showing a spike in flights on average on January 1.  
 
 ```{r}
 all_days <- flights_tbl %>%
@@ -360,12 +360,48 @@ all_days %>%
 
 ```
 
+### 3d. Map top 10 destinations from LAX. Size of dots should reflect the number of flights from LAX to that destination.
+
+```{r}
+lax_dest <- flights_tbl %>%
+    filter(origin == "LAX") %>%
+    group_by(dest) %>%
+    count() %>%
+    arrange(desc(n)) %>%
+    collect() %>%
+    head(10)
+
+lax_dest_airports <- airports_tbl %>% 
+  filter(faa %in% lax_dest$dest) %>%
+  select(faa, lon, lat)
+
+lax_dest_final_tbl <- merge(lax_dest, 
+                          lax_dest_airports, by.x="dest", by.y="faa")
+lax_dest_final_tbl$lon <- as.numeric(as.character(lax_dest_final_tbl$lon))
+lax_dest_final_tbl$lat <- as.numeric(as.character(lax_dest_final_tbl$lat))
+
+usa <- map_data("usa")
+ggplot() + 
+  geom_polygon(data = usa, aes(x=long, y = lat, group = group), 
+               fill = "aliceblue", color = "grey70") + 
+  coord_fixed(1.3) +
+  geom_point(data = lax_dest_final_tbl, 
+             mapping = aes(x = lon, y = lat, color = dest, size = n)) +
+  labs(title = "Top 10 Destinations from LAX, 1987-2008",
+       x = "Longitude",
+       y = "Latitude",
+       color = "Airport",
+       size = "Total Flights")
+
+```
+
+### 4. Build a predictive model for the arrival delay (`arrdelay`) of flights flying from LAX. You are allowed to use a maximum of 5 predictors.  
 
 
 
+### 5. Visualize and explain any other information you want to explore.
 
-
-
+### Question: 
 
 
 
