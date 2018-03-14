@@ -5,7 +5,7 @@ date: "3/16/2018"
 output: html_document
 ---
 
-#### The following code connects to spark, the data, etc.
+#### We first connect to spark, the data, etc.
 
 ```{r, warning=FALSE, message=FALSE}
 if (!"gridExtra" %in% rownames(installed.packages())){
@@ -22,13 +22,13 @@ library(ggplot2)
 library(lubridate)
 library(gridExtra)
 library(viridis)
+
 Sys.setenv(SPARK_HOME="/usr/lib/spark")
 config <- spark_config()
 sc <- spark_connect(master = "yarn-client", config = config)
 flights_tbl <- tbl(sc, 'flights')
 airports_tbl <- tbl(sc, 'airports')
 airlines_tbl <- tbl(sc, 'airlines')
-flights_tbl %>% print(width = Inf) %>% head(3) ## head of the data - delete later
 ```
 
 ### 1. Map the top 10 busiest airports (in 1995). Size of dots should reflect the number of flights through that destination.
@@ -37,7 +37,7 @@ flights_tbl %>% print(width = Inf) %>% head(3) ## head of the data - delete late
 
 Chicago/O'Hare, Dallas/Ft. Worth, Atlanta, and LAX were the top 4 busiest U.S. airports in 1995 according to our metric.  
 
-```{r}
+```{r, echo=FALSE}
 origin_tbl <- flights_tbl %>%
   filter(year == 1995) %>%
   group_by(origin) %>%
@@ -88,7 +88,7 @@ ggplot() +
 
 In 1995, all of the top 10 busiest direct airline routes had their converses in the top 10 as well, as shown by the map. Destinations close to each other that are more popular pack the top 10. For example, Las Vegas to LAX and vice versa was the busiest pair.  
 
-```{r}
+```{r, echo=FALSE}
 routes_tbl <- flights_tbl %>%
   filter(year == 1995) %>%
   group_by(origin, dest) %>%
@@ -134,7 +134,7 @@ ggplot() +
 
 #### The reproduction:  
 
-```{r}
+```{r, echo=FALSE}
 df_3a <- flights_tbl %>%
   filter(year > 1997) %>%
   filter(origin == "LAX" | dest == "LAX") %>%
@@ -156,7 +156,7 @@ df_3a %>%
 
 The 9/11 attacks on September 11, 2001 greatly reduced the number of planes flying in and out of LAX. However, the drop-off is not completely sudden; it takes a few weeks to stabilize again.  
 
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 df_3a %>%
   ggplot() +
     geom_line(mapping = aes(x = date, y = n)) +
@@ -172,7 +172,7 @@ df_3a %>%
 
 Prominent feature #2 is the dip at the end of November, likely Thanksgiving - air traffic decreases because of holiday closures and activities. Prominent feauture #3 is the dip at the beginning of July - Independence Day - much for the same reasons noted above.  
 
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 df_3a %>%
   ggplot() +
     geom_line(mapping = aes(x = date, y = n)) +
@@ -188,7 +188,7 @@ df_3a %>%
 
 The Great Recession began in 2007, and the subtle drop at the beginning of 2008 may be because airports across the country implemented new policies to reduce the number of aircrafts in operation with the hopes of decreasing cost. A larger dip happens in summer 2008 after a small rebound. 
 
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 df_3a %>%
   ggplot() +
     geom_line(mapping = aes(x = date, y = n)) +
@@ -204,7 +204,7 @@ df_3a %>%
 
 It seems like there was a policy change that took effect on January 1, 2001 that increased the number of aircraft in operation. This trend remains constant throughout 2001 until the 9/11 attacks.  
 
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 df_3a %>%
   ggplot() +
     geom_line(mapping = aes(x = date, y = n)) +
@@ -220,7 +220,7 @@ df_3a %>%
 
 First, eliminate the yearly effect. I generate a mean count per year, and center each day's count to the corresponding year's mean.  
 
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 centered_daily_traffic <- flights_tbl %>%
   filter(origin == "LAX" | dest == "LAX") %>%
   group_by(year, month, dayofmonth) %>%
@@ -248,7 +248,7 @@ centered_daily_traffic %>%
 
 Zooming in on a few years at a time for clarity, a defined seasonal component becomes apparent: traffic increases during the summer months and decreases during the winter months in general. Below, 1988-1993 and 2002-2007 are highlighted. You can actually see more day-to-day variance in number of aircrafts in operation in the 90s than in the 00s.  
 
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 centered_daily_traffic %>%
   ggplot() +
     geom_line(mapping = aes(x = date, y = centered_mean)) +
@@ -261,7 +261,7 @@ centered_daily_traffic %>%
          y = "Centered Mean (Daily)")
 ```
 
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 centered_daily_traffic %>%
   ggplot() +
     geom_line(mapping = aes(x = date, y = centered_mean)) +
@@ -276,7 +276,7 @@ centered_daily_traffic %>%
 
 Going further, we can average over each unique day of a year in the range 1987-2008 to see the average trend and quantify the typical deviance in number of operating aircrafts during any season relative to average. There are more flights per day on average from Post-Memorial Day through Labor Day as compared to the rest of the year. This makes summer the peak of the annual seasonality behavior, and winter months (including December) the trough. National holidays are local minima.  
 
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 average_annual_dev <- centered_daily_traffic %>%
   group_by(month, dayofmonth) %>%
   summarize(daily_mean = mean(centered_mean)) %>%
@@ -304,7 +304,7 @@ average_annual_dev %>%
 
 First, let's zoom into two segments of the plot from 3a. Both plots show the overarching weekly trend, a relatively constant number of aircrafts over the weekdays with a substantial drop on Saturday and a partial recovery on Sunday. Both plots shown cover September and October, the top from 2000 (pre-9/11) and the bottom from 2007 (post-9/11). We can see that Tuesdays in the 2007 plot feature less flights on average than the other weekdays; this is a difference in trend from the pre-9/11 plot.  
 
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 weekly_pre <- df_3a %>%
   ggplot() +
     geom_line(mapping = aes(x = date, y = n)) +
@@ -332,7 +332,7 @@ grid.arrange(weekly_pre, weekly_post, nrow=2)
 
 Below is a plot quantifying the proportions of the number of total aircrafts per day of the week that enter and exit LAX grouped by year, showing the trend discussed above (excluding 1987, which does not have complete data for the year). As years progress, we see that Saturdays are decreasing in proportion and Sundays are increasing in proportion relative to the frequencies of flights per year. Using proportions also allows us to see another subtle phenomenon - the lighter-colored (higher proportions) diagonal boxes moving up the plot from left to right signify the day of the week on which New Year's Day falls, which matches our plot from 3b, showing a spike in flights on average on January 1.  
 
-```{r}
+```{r, echo=FALSE}
 all_days <- flights_tbl %>%
   filter(origin == "LAX" | dest == "LAX") %>%
   filter(year > 1987) %>%
@@ -363,7 +363,7 @@ all_days %>%
 
 ### 3d. Map top 10 destinations from LAX. Size of dots should reflect the number of flights from LAX to that destination.
 
-```{r}
+```{r, echo=FALSE}
 lax_dest <- flights_tbl %>%
     filter(origin == "LAX") %>%
     group_by(dest) %>%
@@ -393,14 +393,13 @@ ggplot() +
        y = "Latitude",
        color = "Airport",
        size = "Total Flights")
-
 ```
 
 ### 4. Build a predictive model for the arrival delay (`arrdelay`) of flights flying from LAX. You are allowed to use a maximum of 5 predictors.  
 
 I am subsetting the dataset to include only flights in 2003 and after - predictions will be more indicative of current conditions. 
 
-```{r}
+```{r, eval=FALSE, echo=FALSE}
 model_data <- flights_tbl %>%
   filter(origin == "LAX") %>%  
   filter(!is.na(arrdelay) & !is.na(arrtime) & !is.na(deptime) & 
@@ -413,7 +412,7 @@ model_data <- flights_tbl %>%
 
 Let's see what seem like good predictors.
 
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, eval=FALSE, echo=FALSE}
 # Group by unique carrier:
 model_data %>%
   group_by(uniquecarrier) %>%
@@ -427,7 +426,7 @@ model_data %>%
   arrange(desc(mean_arrdelay)) 
 ```
 
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, eval=FALSE, echo=FALSE}
 # Group by destination:
 model_data %>%
   group_by(dest) %>%
@@ -445,7 +444,7 @@ Choose predictors based on variable selection procedure: TBD
 
 Predictors for now: dest, depdelay, dayofweek, actualelapsedtime, distance
 
-```{r}
+```{r, eval=FALSE, echo=FALSE}
 # Partition the data into training and validation sets
 model_partition <- model_data %>% 
   sdf_partition(train = 0.8, valid = 0.2, seed = 5555)
@@ -462,7 +461,9 @@ summary(ml1)
 
 ### Question: Did flights have increased departing delays on average after 9/11 as compared to before? Is there a difference between JFK (near the attack) and LAX (not near the attack)?
 
-```{r, warning=FALSE, message=FALSE}
+According to the two plots below, JFK airport did not see a significant difference in mean departure delay between the two time intervals. However, it looks as though LAX experienced lower average departure delay with lower variance after the attacks. This was an unexpected result.  
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 mean_depdelay_df <- flights_tbl %>%
   select(year, month, dayofmonth, origin, depdelay) %>%
   filter(origin == "JFK" | origin == "LAX") %>%
@@ -490,7 +491,7 @@ mean_depdelay_df %>%
        y = "Mean Dep. Delay")
 ```
 
-```{r, warning=FALSE, message=FALSE}
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 mean_depdelay_df %>%
   ggplot() +
   geom_line(aes(x = date, y = mean_depdelay,
@@ -504,20 +505,26 @@ mean_depdelay_df %>%
        y = "Mean Dep. Delay")
 ```
 
-```{r}
+Isolating LAX, we can see the rather distinct change in overall mean departure delay and decrease in variability after the attacks. We do not see such a trend with at the JFK airport.  
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 mean_depdelay_df %>%
   filter(origin == "LAX") %>%
   ggplot() +
   geom_line(aes(x = date, y = mean_depdelay)) +
   ylim(-10, 70) +
-  coord_fixed(9.0) + 
+  coord_fixed(12.0) + 
+  geom_vline(xintercept=as.Date("2001-09-11"), 
+             col = "firebrick", linetype = "dashed") +
   labs(title = "Average Departure Delay at LAX",
        subtitle = "1998-2005",
        x = "Date",
        y = "Mean Dep. Delay")
 ```
 
-```{r}
+Lastly, just looking at a table of mean departure time per year for the two airports makes the distinction clear.  
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE}
 flights_tbl %>%
   select(year, origin, depdelay) %>%
   filter(origin == "JFK" | origin == "LAX") %>%
@@ -526,8 +533,6 @@ flights_tbl %>%
   summarize(mean_depdelay = mean(depdelay)) %>%
   arrange(origin, year) %>%
   collect()
-  
-  
 ```
 
 
