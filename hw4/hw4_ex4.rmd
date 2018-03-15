@@ -1,0 +1,78 @@
+---
+title: 'BIOSTAT 203B: Homework #4, Exercise #4'
+author: "Chad Pickering"
+date: "3/16/2018"
+output: html_document
+---
+
+##### Connect, etc.:
+
+```{r, warning=FALSE, message=FALSE}
+if (!"gridExtra" %in% rownames(installed.packages())){
+  install.packages("gridExtra", repos="http://cran.rstudio.com/")
+}
+
+if (!"viridis" %in% rownames(installed.packages())){
+  install.packages("viridis", repos="http://cran.rstudio.com/")
+}
+
+library(sparklyr)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(gridExtra)
+library(viridis)
+
+Sys.setenv(SPARK_HOME="/usr/lib/spark")
+config <- spark_config()
+sc <- spark_connect(master = "yarn-client", config = config)
+flights_tbl <- tbl(sc, 'flights')
+airports_tbl <- tbl(sc, 'airports')
+airlines_tbl <- tbl(sc, 'airlines')
+```
+
+### 4. Build a predictive model for the arrival delay (`arrdelay`) of flights flying from LAX. You are allowed to use a maximum of 5 predictors.  
+
+I am subsetting the dataset to include only flights in 2003 and after - predictions will be more indicative of current conditions. 
+
+```{r, echo=FALSE}
+model_data <- flights_tbl %>%
+  filter(origin == "LAX") %>%  
+  filter(!is.na(arrdelay) & !is.na(arrtime) & !is.na(deptime) & 
+           !is.na(depdelay) & !is.na(actualelapsedtime) & !is.na(distance)) %>%
+  filter(year >= 2003) %>%
+  left_join(airlines_tbl, by = c("uniquecarrier" = "code")) %>%
+  select(arrdelay, month, dayofweek, uniquecarrier, description, dest, 
+         arrtime, deptime, depdelay, actualelapsedtime, distance)
+```
+
+Predictors for now: dest, depdelay, dayofweek, actualelapsedtime, distance
+
+depdelay R2=0.8334, RMSE=11.81
+depdelay + actualelap R2=0.834, RMSE=11.79
+depdelay + distance R2=0.8338, RMSE=11.79
+depdelay + dayofweek R2=0.8334, RMSE=11.81
+depdelay + arrtime R2=0.8334, RMSE=11.81
+depdelay + uniquecarrier R2=0.8352, RMSE=11.74
+depdelay + actualelap + distance R2=0.9294, RMSE=7.686
+depdelay + uniquecarrier + actualelap + distance R2=0.9349, RMSE=7.381
+```{r, echo=FALSE}
+# Partition the data into training and validation sets
+model_partition <- model_data %>% 
+  sdf_partition(train = 0.8, valid = 0.2, seed = 5555)
+
+# Fit a linear model
+ml1 <- model_partition$train %>%
+  ml_linear_regression(arrdelay ~ depdelay + uniquecarrier + 
+                         actualelapsedtime + distance)
+
+summary(ml1)
+```
+
+
+
+
+
+
+
+
