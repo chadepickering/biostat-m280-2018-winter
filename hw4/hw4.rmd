@@ -421,36 +421,6 @@ model_data <- flights_tbl %>%
          arrtime, deptime, depdelay, actualelapsedtime, distance)
 ```
 
-Let's see what seem like good predictors.
-
-```{r, warning=FALSE, message=FALSE, eval=FALSE, echo=FALSE}
-# Group by unique carrier:
-model_data %>%
-  group_by(uniquecarrier) %>%
-  summarize(description = min(description), 
-            mean_arrdelay = mean(arrdelay), 
-            mean_depdelay = mean(depdelay), 
-            mean_elaptime = mean(actualelapsedtime), 
-            mean_dist = mean(distance)) %>%
-  select(description, mean_arrdelay, 
-         mean_depdelay, mean_elaptime, mean_dist) %>%
-  arrange(desc(mean_arrdelay)) 
-```
-
-```{r, warning=FALSE, message=FALSE, eval=FALSE, echo=FALSE}
-# Group by destination:
-model_data %>%
-  group_by(dest) %>%
-  summarize(description = min(description), 
-            mean_arrdelay = mean(arrdelay), 
-            mean_depdelay = mean(depdelay), 
-            mean_elaptime = mean(actualelapsedtime), 
-            mean_dist = mean(distance)) %>%
-  select(dest, mean_arrdelay, 
-         mean_depdelay, mean_elaptime, mean_dist) %>%
-  arrange(desc(mean_arrdelay))
-```
-
 Choose predictors based on variable selection procedure: TBD
 
 Predictors for now: dest, depdelay, dayofweek, actualelapsedtime, distance
@@ -467,6 +437,8 @@ ml1 <- model_partition$train %>%
 
 summary(ml1)
 ```
+
+
 
 ### 5. Visualize and explain any other information you want to explore.
 
@@ -546,4 +518,6 @@ flights_tbl %>%
   collect()
 ```
 
-
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+spark_disconnect_all()
+```
