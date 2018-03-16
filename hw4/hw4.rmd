@@ -5,7 +5,7 @@ date: "3/16/2018"
 output: html_document
 ---
 
-#### We first connect to spark, the data, etc.
+#### We first connect to spark, the data, etc...
 
 ```{r, warning=FALSE, message=FALSE}
 if (!"gridExtra" %in% rownames(installed.packages())){
